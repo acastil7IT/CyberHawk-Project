@@ -1,0 +1,14 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    url: postgres:5432
+    database: securenet
+    user: admin
+    secureJsonData:
+      password: secure123
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1500
+    isDefault: true
