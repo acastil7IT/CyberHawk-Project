@@ -6,7 +6,8 @@ import {
   AlertOutlined,
   GlobalOutlined,
   SecurityScanOutlined,
-  BugOutlined
+  BugOutlined,
+  WifiOutlined
 } from '@ant-design/icons';
 
 import Dashboard from './components/Dashboard';
@@ -14,6 +15,7 @@ import Incidents from './components/Incidents';
 import NetworkTraffic from './components/NetworkTraffic';
 import LiveAlerts from './components/LiveAlerts';
 import AdvancedScanning from './components/AdvancedScanning';
+import NetworkDiscovery from './components/NetworkDiscovery';
 
 import './App.css';
 
@@ -49,6 +51,11 @@ function App() {
       key: '/advanced-scanning',
       icon: <BugOutlined />,
       label: 'Advanced Scanning',
+    },
+    {
+      key: '/network-discovery',
+      icon: <WifiOutlined />,
+      label: 'Network Discovery',
     },
   ];
 
@@ -118,6 +125,7 @@ function App() {
               <Route path="/traffic" element={<NetworkTraffic />} />
               <Route path="/alerts" element={<LiveAlerts />} />
               <Route path="/advanced-scanning" element={<AdvancedScanning />} />
+              <Route path="/network-discovery" element={<NetworkDiscovery />} />
             </Routes>
           </Content>
         </Layout>

@@ -118,6 +118,17 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=vulnerable123
 
+  # Network Discovery Service
+  network-discovery:
+    build: ./services/network-discovery
+    privileged: true
+    network_mode: host
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://admin:secure123@localhost:5433/securenet
+    restart: unless-stopped
+
   # Grafana for metrics
   grafana:
     image: grafana/grafana:latest

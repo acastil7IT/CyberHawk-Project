@@ -477,6 +477,78 @@ async def get_scan_history(user=Depends(get_current_user)):
         logger.error("Failed to get scan history", error=str(e))
         raise HTTPException(status_code=500, detail="Failed to retrieve scan history")
 
+@app.get("/api/network/devices")
+async def get_network_devices(user=Depends(get_current_user)):
+    """Get discovered network devices"""
+    try:
+        async with db_pool.acquire() as conn:
+            # Get all devices
+            devices = await conn.fetch("""
+                SELECT id, ip_address, hostname, mac_address, vendor, device_type,
+                       os_fingerprint, open_ports, services, is_online, risk_score,
+                       last_seen, first_discovered
+                FROM network_devices 
+                ORDER BY last_seen DESC
+            """)
+            
+            # Get statistics
+            stats = await conn.fetchrow("""
+                SELECT 
+                    COUNT(*) as total,
+                    COUNT(*) FILTER (WHERE is_online = true) as online,
+                    COUNT(*) FILTER (WHERE is_online = false) as offline,
+                    COUNT(*) FILTER (WHERE first_discovered > NOW() - INTERVAL '1 day') as new_today
+                FROM network_devices
+            """)
+            
+            # Convert to dict and handle JSON fields
+            device_list = []
+            for device in devices:
+                device_dict = dict(device)
+                device_dict['ip_address'] = str(device_dict['ip_address'])
+                
+                # Parse JSON fields
+                if device_dict['services']:
+                    try:
+                        device_dict['services'] = json.loads(device_dict['services'])
+                    except:
+                        device_dict['services'] = {}
+                        
+                device_list.append(device_dict)
+            
+            return {
+                "devices": device_list,
+                "stats": dict(stats) if stats else {"total": 0, "online": 0, "offline": 0, "new_today": 0}
+            }
+            
+    except Exception as e:
+        logger.error("Failed to get network devices", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve network devices")
+
+@app.post("/api/network/scan")
+async def start_network_scan(user=Depends(get_current_user)):
+    """Trigger a network discovery scan"""
+    try:
+        # In a real implementation, this would trigger the network discovery service
+        # For now, we'll just return a success message
+        
+        logger.info("Network scan requested", user=user["username"])
+        
+        # You could trigger the actual scan here by:
+        # 1. Sending a message to a queue
+        # 2. Making an HTTP request to the discovery service
+        # 3. Writing a trigger file that the service monitors
+        
+        return {
+            "message": "Network scan started",
+            "status": "scanning",
+            "estimated_duration": "5-10 minutes"
+        }
+        
+    except Exception as e:
+        logger.error("Failed to start network scan", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to start network scan")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

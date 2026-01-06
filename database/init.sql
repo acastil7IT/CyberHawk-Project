@@ -57,9 +57,15 @@ CREATE TABLE network_devices (
     mac_address VARCHAR(17),
     hostname VARCHAR(255),
     device_type VARCHAR(50),
+    vendor VARCHAR(255),
     os_fingerprint VARCHAR(100),
+    open_ports TEXT[], -- Array of open ports
+    services JSONB, -- Services running on open ports
     last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    risk_score INTEGER DEFAULT 0
+    first_discovered TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_online BOOLEAN DEFAULT TRUE,
+    risk_score INTEGER DEFAULT 0,
+    device_info JSONB -- Additional device information
 );
 
 -- Create indexes for performance
