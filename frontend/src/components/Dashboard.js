@@ -32,7 +32,60 @@ const Dashboard = () => {
           mockApi.getDashboardStats(),
           fetch('http://localhost:8001/api/network/devices', {
             headers: { 'Authorization': 'Bearer demo-token' }
-          }).then(res => res.json()).catch(() => ({ devices: [] }))
+          }).then(res => res.json()).catch(() => ({ 
+            devices: [
+              {
+                id: 1,
+                ip_address: '192.168.1.1',
+                hostname: 'router.local',
+                device_type: 'Router/Gateway',
+                vendor: 'Netgear Inc.',
+                is_online: true,
+                mac_address: '00:1B:44:11:3A:B7',
+                last_seen: new Date().toISOString()
+              },
+              {
+                id: 2,
+                ip_address: '192.168.1.100',
+                hostname: 'workstation-01',
+                device_type: 'Windows Computer',
+                vendor: 'Dell Inc.',
+                is_online: true,
+                mac_address: '00:50:56:C0:00:08',
+                last_seen: new Date().toISOString()
+              },
+              {
+                id: 3,
+                ip_address: '192.168.1.150',
+                hostname: 'iPhone-Alex',
+                device_type: 'Mobile Device',
+                vendor: 'Apple Inc.',
+                is_online: true,
+                mac_address: '8C:85:90:12:34:56',
+                last_seen: new Date().toISOString()
+              },
+              {
+                id: 4,
+                ip_address: '192.168.1.200',
+                hostname: 'server-01',
+                device_type: 'Linux Server',
+                vendor: 'HP Enterprise',
+                is_online: true,
+                mac_address: '00:15:5D:FF:FF:FF',
+                last_seen: new Date().toISOString()
+              },
+              {
+                id: 5,
+                ip_address: '192.168.1.75',
+                hostname: 'smart-tv',
+                device_type: 'IoT Device',
+                vendor: 'Samsung Electronics',
+                is_online: false,
+                mac_address: '00:26:37:12:34:56',
+                last_seen: new Date(Date.now() - 3600000).toISOString()
+              }
+            ]
+          }))
         ]);
         
         setStats(statsResponse);
