@@ -25,12 +25,37 @@ const Incidents = () => {
   const fetchIncidents = useCallback(async () => {
     try {
       setLoading(true);
+      
+      // Try to fetch from real API first
+      try {
+        const params = new URLSearchParams();
+        if (filters.severity) params.append('severity', filters.severity);
+        if (filters.status) params.append('status', filters.status);
+        params.append('limit', '50');
+
+        const response = await fetch(`http://localhost:8001/api/incidents?${params}`, {
+          headers: {
+            'Authorization': 'Bearer demo-token'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setIncidents(data);
+          return;
+        }
+      } catch (apiError) {
+        console.log('Real API unavailable, using mock data for cloud deployment');
+      }
+      
+      // Fallback to mock data for cloud deployment
       const response = await mockApi.getIncidents({
         severity: filters.severity,
         status: filters.status,
         limit: 50
       });
       setIncidents(response);
+      
     } catch (error) {
       message.error('Failed to fetch incidents');
       console.error('Incidents fetch error:', error);
@@ -45,6 +70,26 @@ const Incidents = () => {
 
   const handleAcknowledge = async (incidentId) => {
     try {
+      // Try real API first
+      try {
+        const response = await fetch(`http://localhost:8001/api/incidents/${incidentId}/acknowledge`, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer demo-token',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          message.success('Incident acknowledged');
+          fetchIncidents();
+          return;
+        }
+      } catch (apiError) {
+        console.log('Real API unavailable, using mock acknowledgment');
+      }
+      
+      // Fallback to mock API
       await mockApi.acknowledgeIncident(incidentId);
       message.success('Incident acknowledged');
       fetchIncidents();
@@ -60,6 +105,26 @@ const Incidents = () => {
       content: 'Are you sure you want to resolve this incident?',
       onOk: async () => {
         try {
+          // Try real API first
+          try {
+            const response = await fetch(`http://localhost:8001/api/incidents/${incidentId}/resolve`, {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer demo-token',
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              message.success('Incident resolved');
+              fetchIncidents();
+              return;
+            }
+          } catch (apiError) {
+            console.log('Real API unavailable, using mock resolution');
+          }
+          
+          // Fallback to mock API
           await mockApi.resolveIncident(incidentId);
           message.success('Incident resolved');
           fetchIncidents();
@@ -212,91 +277,85 @@ const Incidents = () => {
   ];
 
   return (
-    <div>
-      {/* Threat Intelligence Overview */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <AlertOutlined />
-            </div>
-            <div className="stat-value">
-              {incidents.filter(i => i.status === 'OPEN').length}
-            </div>
+    <div className="cyberhawk-content">
+      <div className="page-header">
+        <h1>🎯 Threat Intelligence</h1>
+        <p>Monitor and respond to security incidents across your network infrastructure. All incidents are automatically classified and prioritized.</p>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon critical">
+            <AlertOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{incidents.filter(i => i.status === 'OPEN').length}</div>
             <div className="stat-label">Active Threats</div>
           </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <BugOutlined />
-            </div>
-            <div className="stat-value">
-              {incidents.filter(i => i.severity === 'CRITICAL' || i.severity === 'HIGH').length}
-            </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon warning">
+            <BugOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{incidents.filter(i => i.severity === 'CRITICAL' || i.severity === 'HIGH').length}</div>
             <div className="stat-label">Critical/High</div>
           </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <SecurityScanOutlined />
-            </div>
-            <div className="stat-value">
-              {incidents.filter(i => i.status === 'ACKNOWLEDGED').length}
-            </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon info">
+            <SecurityScanOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{incidents.filter(i => i.status === 'ACKNOWLEDGED').length}</div>
             <div className="stat-label">Under Investigation</div>
           </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <SafetyOutlined />
-            </div>
-            <div className="stat-value">
-              {incidents.filter(i => i.status === 'RESOLVED').length}
-            </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon success">
+            <SafetyOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{incidents.filter(i => i.status === 'RESOLVED').length}</div>
             <div className="stat-label">Resolved</div>
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
 
-      <Card title="🎯 Threat Intelligence Dashboard">
-        <Alert
-          message="Security Operations Center"
-          description="Monitor and respond to security incidents across your network infrastructure. All incidents are automatically classified and prioritized."
-          type="info"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
-
-        <div style={{ marginBottom: 16 }}>
-          <Space>
-            <Select
-              placeholder="Filter by Severity"
-              style={{ width: 150 }}
-              allowClear
-              onChange={(value) => setFilters({ ...filters, severity: value })}
-            >
-              <Option value="CRITICAL">Critical</Option>
-              <Option value="HIGH">High</Option>
-              <Option value="MEDIUM">Medium</Option>
-              <Option value="LOW">Low</Option>
-            </Select>
-            <Select
-              placeholder="Filter by Status"
-              style={{ width: 150 }}
-              allowClear
-              onChange={(value) => setFilters({ ...filters, status: value })}
-            >
-              <Option value="OPEN">Open</Option>
-              <Option value="ACKNOWLEDGED">Acknowledged</Option>
-              <Option value="RESOLVED">Resolved</Option>
-            </Select>
-            <Button onClick={fetchIncidents} icon={<ReloadOutlined />}>
-              Refresh Intelligence
-            </Button>
-          </Space>
+      <div className="content-card">
+        <div className="card-header">
+          <h3>🛡️ Security Operations Center</h3>
+          <div className="controls">
+            <Space>
+              <Select
+                placeholder="Filter by Severity"
+                style={{ width: 150 }}
+                allowClear
+                onChange={(value) => setFilters({ ...filters, severity: value })}
+              >
+                <Option value="CRITICAL">Critical</Option>
+                <Option value="HIGH">High</Option>
+                <Option value="MEDIUM">Medium</Option>
+                <Option value="LOW">Low</Option>
+              </Select>
+              <Select
+                placeholder="Filter by Status"
+                style={{ width: 150 }}
+                allowClear
+                onChange={(value) => setFilters({ ...filters, status: value })}
+              >
+                <Option value="OPEN">Open</Option>
+                <Option value="ACKNOWLEDGED">Acknowledged</Option>
+                <Option value="RESOLVED">Resolved</Option>
+              </Select>
+              <Button onClick={fetchIncidents} icon={<ReloadOutlined />}>
+                Refresh Intelligence
+              </Button>
+            </Space>
+          </div>
         </div>
 
         <Table
@@ -310,8 +369,9 @@ const Incidents = () => {
             showQuickJumper: true,
           }}
           scroll={{ x: 1200 }}
+          className="cyberhawk-table"
         />
-      </Card>
+      </div>
     </div>
   );
 };

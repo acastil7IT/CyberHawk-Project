@@ -537,138 +537,135 @@ const AdvancedScanning = () => {
   ];
 
   return (
-    <div>
-      <Alert
-        message="Advanced Security Scanning"
-        description="Professional security tools integration: Nmap, Wireshark, Nikto, and more. Only scan systems you own or have permission to test."
-        type="info"
-        showIcon
-        style={{ marginBottom: 24 }}
-      />
+    <div className="cyberhawk-content">
+      <div className="page-header">
+        <h1>🔍 Advanced Scanning</h1>
+        <p>Professional security tools integration: Nmap, Wireshark, Nikto, and more. Only scan systems you own or have permission to test.</p>
+      </div>
 
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={8}>
-          <Card title="🎯 Scan Configuration" size="small">
-            <div style={{ marginBottom: 16 }}>
-              <label>Target:</label>
-              <Select
-                value={selectedTarget}
-                onChange={setSelectedTarget}
-                style={{ width: '100%', marginTop: 8 }}
-              >
-                {predefinedTargets.map(target => (
-                  <Option key={target.value} value={target.value}>
-                    {target.label}
-                  </Option>
-                ))}
-              </Select>
-              <Input
-                placeholder="Or enter custom target"
-                style={{ marginTop: 8 }}
-                onChange={(e) => setSelectedTarget(e.target.value)}
-              />
-            </div>
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon">
+            <ScanOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{recentScans.length}</div>
+            <div className="stat-label">Total Scans</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon critical">
+            <BugOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{scanResults.filter(r => r.severity === 'HIGH' || r.severity === 'CRITICAL').length}</div>
+            <div className="stat-label">High Risk</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon success">
+            <GlobalOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{deviceStats.online}</div>
+            <div className="stat-label">Online Devices</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon">
+            <DesktopOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{deviceStats.total}</div>
+            <div className="stat-label">Total Devices</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon warning">
+            <SecurityScanOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{networkDevices.filter(d => (d.risk_score || 0) >= 4).length}</div>
+            <div className="stat-label">Risk Devices</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon info">
+            <WifiOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{deviceStats.new_today}</div>
+            <div className="stat-label">New Today</div>
+          </div>
+        </div>
+      </div>
 
-            <div style={{ marginBottom: 16 }}>
-              <label>Scan Type:</label>
-              <Select
-                value={scanType}
-                onChange={setScanType}
-                style={{ width: '100%', marginTop: 8 }}
-              >
-                {scanTypes.map(type => (
-                  <Option key={type.value} value={type.value}>
-                    {type.label}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-
-            <Button
-              type="primary"
-              icon={scanning ? <StopOutlined /> : <PlayCircleOutlined />}
-              onClick={startAdvancedScan}
-              loading={scanning}
-              block
-              size="large"
+      <div className="content-grid">
+        <div className="content-card scan-config">
+          <h3>🎯 Scan Configuration</h3>
+          <div className="form-group">
+            <label>Target:</label>
+            <Select
+              value={selectedTarget}
+              onChange={setSelectedTarget}
+              style={{ width: '100%', marginTop: 8 }}
             >
-              {scanning ? 'Scanning...' : 'Start Advanced Scan'}
-            </Button>
+              {predefinedTargets.map(target => (
+                <Option key={target.value} value={target.value}>
+                  {target.label}
+                </Option>
+              ))}
+            </Select>
+            <Input
+              placeholder="Or enter custom target"
+              style={{ marginTop: 8 }}
+              onChange={(e) => setSelectedTarget(e.target.value)}
+            />
+          </div>
 
-            {scanning && (
-              <div style={{ marginTop: 16 }}>
-                <Progress percent={scanProgress} status="active" />
-                <p style={{ textAlign: 'center', marginTop: 8 }}>
-                  Running {scanType} scan on {selectedTarget}
-                </p>
-              </div>
-            )}
-          </Card>
-        </Col>
+          <div className="form-group">
+            <label>Scan Type:</label>
+            <Select
+              value={scanType}
+              onChange={setScanType}
+              style={{ width: '100%', marginTop: 8 }}
+            >
+              {scanTypes.map(type => (
+                <Option key={type.value} value={type.value}>
+                  {type.label}
+                </Option>
+              ))}
+            </Select>
+          </div>
 
-        <Col span={16}>
-          <Card title="📊 Network Statistics" size="small">
-            <Row gutter={16}>
-              <Col span={4}>
-                <div style={{ textAlign: 'center' }}>
-                  <ScanOutlined style={{ fontSize: 24, color: '#1890ff' }} />
-                  <div style={{ fontSize: 20, fontWeight: 'bold' }}>
-                    {recentScans.length}
-                  </div>
-                  <div>Total Scans</div>
-                </div>
-              </Col>
-              <Col span={4}>
-                <div style={{ textAlign: 'center' }}>
-                  <BugOutlined style={{ fontSize: 24, color: '#f5222d' }} />
-                  <div style={{ fontSize: 20, fontWeight: 'bold' }}>
-                    {scanResults.filter(r => r.severity === 'HIGH' || r.severity === 'CRITICAL').length}
-                  </div>
-                  <div>High Risk</div>
-                </div>
-              </Col>
-              <Col span={4}>
-                <div style={{ textAlign: 'center' }}>
-                  <GlobalOutlined style={{ fontSize: 24, color: '#52c41a' }} />
-                  <div style={{ fontSize: 20, fontWeight: 'bold' }}>
-                    {deviceStats.online}
-                  </div>
-                  <div>Online Devices</div>
-                </div>
-              </Col>
-              <Col span={4}>
-                <div style={{ textAlign: 'center' }}>
-                  <DesktopOutlined style={{ fontSize: 24, color: '#722ed1' }} />
-                  <div style={{ fontSize: 20, fontWeight: 'bold' }}>
-                    {deviceStats.total}
-                  </div>
-                  <div>Total Devices</div>
-                </div>
-              </Col>
-              <Col span={4}>
-                <div style={{ textAlign: 'center' }}>
-                  <SecurityScanOutlined style={{ fontSize: 24, color: '#fa8c16' }} />
-                  <div style={{ fontSize: 20, fontWeight: 'bold' }}>
-                    {networkDevices.filter(d => (d.risk_score || 0) >= 4).length}
-                  </div>
-                  <div>Risk Devices</div>
-                </div>
-              </Col>
-              <Col span={4}>
-                <div style={{ textAlign: 'center' }}>
-                  <WifiOutlined style={{ fontSize: 24, color: '#13c2c2' }} />
-                  <div style={{ fontSize: 20, fontWeight: 'bold' }}>
-                    {deviceStats.new_today}
-                  </div>
-                  <div>New Today</div>
-                </div>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-      </Row>
+          <Button
+            type="primary"
+            icon={scanning ? <StopOutlined /> : <PlayCircleOutlined />}
+            onClick={startAdvancedScan}
+            loading={scanning}
+            block
+            size="large"
+            className="scan-button"
+          >
+            {scanning ? 'Scanning...' : 'Start Advanced Scan'}
+          </Button>
 
-      <Tabs defaultActiveKey="devices">
+          {scanning && (
+            <div className="scan-progress">
+              <Progress percent={scanProgress} status="active" />
+              <p>Running {scanType} scan on {selectedTarget}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="content-card">
+        <Tabs defaultActiveKey="devices" className="cyberhawk-tabs">
         <TabPane tab={
           <span>
             🌐 Network Devices 
@@ -810,7 +807,8 @@ const AdvancedScanning = () => {
             </Row>
           </Card>
         </TabPane>
-      </Tabs>
+        </Tabs>
+      </div>
     </div>
   );
 };

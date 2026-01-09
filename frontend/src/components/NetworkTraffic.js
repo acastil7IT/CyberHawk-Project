@@ -147,88 +147,84 @@ const NetworkTraffic = () => {
   ];
 
   return (
-    <div>
-      {/* Network Monitoring Overview */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <GlobalOutlined />
-            </div>
-            <div className="stat-value">{traffic.length}</div>
+    <div className="cyberhawk-content">
+      <div className="page-header">
+        <h1>📡 Live Network Monitor</h1>
+        <p>Monitor live network traffic across your infrastructure. Traffic is automatically captured and analyzed for security patterns.</p>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon">
+            <GlobalOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{traffic.length}</div>
             <div className="stat-label">Live Packets</div>
           </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <ThunderboltOutlined />
-            </div>
-            <div className="stat-value">
-              {traffic.filter(t => t.protocol === 'TCP').length}
-            </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon info">
+            <ThunderboltOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{traffic.filter(t => t.protocol === 'TCP').length}</div>
             <div className="stat-label">TCP Connections</div>
           </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <CloudServerOutlined />
-            </div>
-            <div className="stat-value">
-              {traffic.filter(t => t.protocol === 'UDP').length}
-            </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon success">
+            <CloudServerOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{traffic.filter(t => t.protocol === 'UDP').length}</div>
             <div className="stat-label">UDP Packets</div>
           </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <SecurityScanOutlined />
-            </div>
-            <div className="stat-value">
-              {new Set(traffic.map(t => t.source_ip)).size}
-            </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon warning">
+            <SecurityScanOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{new Set(traffic.map(t => t.source_ip)).size}</div>
             <div className="stat-label">Unique Sources</div>
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
 
-      <Card title="📡 Network Traffic Monitor">
-        <Alert
-          message="Real-Time Network Analysis"
-          description="Monitor live network traffic across your infrastructure. Traffic is automatically captured and analyzed for security patterns."
-          type="info"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
-
-        <div style={{ marginBottom: 16 }}>
-          <Space>
-            <Input
-              placeholder="Search by Source IP"
-              value={searchIP}
-              onChange={(e) => setSearchIP(e.target.value)}
-              onPressEnter={handleSearch}
-              style={{ width: 200 }}
-            />
-            <Button 
-              type="primary" 
-              icon={<SearchOutlined />}
-              onClick={handleSearch}
-            >
-              Search Traffic
-            </Button>
-            <Button 
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchIP('');
-                fetchTraffic();
-              }}
-            >
-              Clear & Refresh
-            </Button>
-          </Space>
+      <div className="content-card">
+        <div className="card-header">
+          <h3>🌐 Real-Time Network Analysis</h3>
+          <div className="controls">
+            <Space>
+              <Input
+                placeholder="Search by Source IP"
+                value={searchIP}
+                onChange={(e) => setSearchIP(e.target.value)}
+                onPressEnter={handleSearch}
+                style={{ width: 200 }}
+              />
+              <Button 
+                type="primary" 
+                icon={<SearchOutlined />}
+                onClick={handleSearch}
+              >
+                Search Traffic
+              </Button>
+              <Button 
+                icon={<ReloadOutlined />}
+                onClick={() => {
+                  setSearchIP('');
+                  fetchTraffic();
+                }}
+              >
+                Clear & Refresh
+              </Button>
+            </Space>
+          </div>
         </div>
 
         <Table
@@ -245,8 +241,9 @@ const NetworkTraffic = () => {
           }}
           scroll={{ x: 800 }}
           size="small"
+          className="cyberhawk-table"
         />
-      </Card>
+      </div>
     </div>
   );
 };

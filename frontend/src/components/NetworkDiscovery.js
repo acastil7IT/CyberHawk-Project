@@ -303,71 +303,63 @@ const NetworkDiscovery = () => {
   ];
 
   return (
-    <div>
-      <Alert
-        message="Network Discovery"
-        description="Real-time monitoring of devices on your local network. This feature scans your network to discover connected devices and monitor their status."
-        type="info"
-        showIcon
-        style={{ marginBottom: 24 }}
-      />
+    <div className="cyberhawk-content">
+      <div className="page-header">
+        <h1>🌐 Network Discovery</h1>
+        <p>Real-time monitoring of devices on your local network. This feature scans your network to discover connected devices and monitor their status.</p>
+      </div>
 
-      {/* Statistics Cards */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
-          <Card>
-            <div style={{ textAlign: 'center' }}>
-              <WifiOutlined style={{ fontSize: 24, color: '#1890ff' }} />
-              <div style={{ fontSize: 20, fontWeight: 'bold', marginTop: 8 }}>
-                {stats.total}
-              </div>
-              <div>Total Devices</div>
-            </div>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <div style={{ textAlign: 'center' }}>
-              <CheckCircleOutlined style={{ fontSize: 24, color: '#52c41a' }} />
-              <div style={{ fontSize: 20, fontWeight: 'bold', marginTop: 8 }}>
-                {stats.online}
-              </div>
-              <div>Online</div>
-            </div>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <div style={{ textAlign: 'center' }}>
-              <WarningOutlined style={{ fontSize: 24, color: '#f5222d' }} />
-              <div style={{ fontSize: 20, fontWeight: 'bold', marginTop: 8 }}>
-                {stats.offline}
-              </div>
-              <div>Offline</div>
-            </div>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <div style={{ textAlign: 'center' }}>
-              <ApiOutlined style={{ fontSize: 24, color: '#722ed1' }} />
-              <div style={{ fontSize: 20, fontWeight: 'bold', marginTop: 8 }}>
-                {stats.new_today}
-              </div>
-              <div>New Today</div>
-            </div>
-          </Card>
-        </Col>
-      </Row>
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon">
+            <WifiOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{stats.total}</div>
+            <div className="stat-label">Total Devices</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon success">
+            <CheckCircleOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{stats.online}</div>
+            <div className="stat-label">Online</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon critical">
+            <WarningOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{stats.offline}</div>
+            <div className="stat-label">Offline</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon info">
+            <ApiOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{stats.new_today}</div>
+            <div className="stat-label">New Today</div>
+          </div>
+        </div>
+      </div>
 
-      {/* Control Panel */}
-      <Card title="Network Scan Control" style={{ marginBottom: 24 }}>
-        <Space>
+      <div className="content-card">
+        <h3>🎮 Network Scan Control</h3>
+        <div className="control-panel">
           <Button
             type="primary"
             icon={<ReloadOutlined />}
             loading={scanning}
             onClick={startNetworkScan}
+            className="scan-button"
           >
             {scanning ? 'Scanning Network...' : 'Start Network Scan'}
           </Button>
@@ -378,19 +370,17 @@ const NetworkDiscovery = () => {
           >
             Refresh
           </Button>
-        </Space>
+        </div>
         {scanning && (
-          <div style={{ marginTop: 16 }}>
+          <div className="scan-progress">
             <Progress percent={100} status="active" showInfo={false} />
-            <p style={{ marginTop: 8, color: '#666' }}>
-              Scanning local network for devices... This may take a few minutes.
-            </p>
+            <p>Scanning local network for devices... This may take a few minutes.</p>
           </div>
         )}
-      </Card>
+      </div>
 
-      {/* Devices Table */}
-      <Card title="Discovered Devices">
+      <div className="content-card">
+        <h3>📡 Discovered Devices</h3>
         <Table
           columns={columns}
           dataSource={devices}
@@ -402,8 +392,9 @@ const NetworkDiscovery = () => {
             showQuickJumper: true,
             showTotal: (total) => `Total ${total} devices`,
           }}
+          className="cyberhawk-table"
         />
-      </Card>
+      </div>
 
       {/* Device Details Modal */}
       <Modal

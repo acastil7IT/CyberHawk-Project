@@ -73,194 +73,171 @@ const LiveAlerts = () => {
   };
 
   return (
-    <div>
-      {/* Live Threats Overview */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <AlertOutlined />
-            </div>
-            <div className="stat-value">{alerts.length}</div>
+    <div className="cyberhawk-content">
+      <div className="page-header">
+        <h1>🚨 Cyber Arsenal</h1>
+        <p>Live threat detection system monitoring your network for suspicious activities. Alerts are automatically classified and prioritized.</p>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon critical">
+            <AlertOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{alerts.length}</div>
             <div className="stat-label">Active Alerts</div>
           </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <BugOutlined />
-            </div>
-            <div className="stat-value">
-              {alerts.filter(a => a.severity === 'CRITICAL' || a.severity === 'HIGH').length}
-            </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon warning">
+            <BugOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{alerts.filter(a => a.severity === 'CRITICAL' || a.severity === 'HIGH').length}</div>
             <div className="stat-label">High Priority</div>
           </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <ThunderboltOutlined />
-            </div>
-            <div className="stat-value">
-              {alerts.filter(a => a.confidence >= 0.8).length}
-            </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon info">
+            <ThunderboltOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{alerts.filter(a => a.confidence >= 0.8).length}</div>
             <div className="stat-label">High Confidence</div>
           </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <SecurityScanOutlined />
-            </div>
-            <div className="stat-value">
-              {new Set(alerts.map(a => a.source_ip)).size}
-            </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon">
+            <SecurityScanOutlined />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{new Set(alerts.map(a => a.source_ip)).size}</div>
             <div className="stat-label">Threat Sources</div>
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
 
-      <Card title="🚨 Live Threat Detection">
-        <Alert
-          message="Real-Time Security Monitoring"
-          description="Live threat detection system monitoring your network for suspicious activities. Alerts are automatically classified and prioritized."
-          type="warning"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
-
-        <div style={{ marginBottom: 16 }}>
-          <Space>
-            <Button 
-              type="primary"
-              icon={<ReloadOutlined />}
-              onClick={fetchLiveAlerts}
-              loading={loading}
-            >
-              Refresh Threats
-            </Button>
-            <Button
-              type={autoRefresh ? 'primary' : 'default'}
-              onClick={() => setAutoRefresh(!autoRefresh)}
-            >
-              {autoRefresh ? '🔄 Auto-Refresh ON' : '⏸️ Auto-Refresh OFF'}
-            </Button>
-            <Badge 
-              count={alerts.length} 
-              style={{ backgroundColor: '#ff4d4f' }}
-            >
-              <span style={{ fontWeight: '600' }}>Live Alerts</span>
-            </Badge>
-          </Space>
+      <div className="content-card">
+        <div className="card-header">
+          <h3>⚡ Real-Time Security Monitoring</h3>
+          <div className="controls">
+            <Space>
+              <Button 
+                type="primary"
+                icon={<ReloadOutlined />}
+                onClick={fetchLiveAlerts}
+                loading={loading}
+              >
+                Refresh Threats
+              </Button>
+              <Button
+                type={autoRefresh ? 'primary' : 'default'}
+                onClick={() => setAutoRefresh(!autoRefresh)}
+              >
+                {autoRefresh ? '🔄 Auto-Refresh ON' : '⏸️ Auto-Refresh OFF'}
+              </Button>
+              <Badge 
+                count={alerts.length} 
+                style={{ backgroundColor: '#ff4d4f' }}
+              >
+                <span style={{ fontWeight: '600' }}>Live Alerts</span>
+              </Badge>
+            </Space>
+          </div>
         </div>
 
         {alerts.length === 0 && !loading && (
-          <Alert
-            message="🛡️ All Clear"
-            description="No security threats detected in the last few minutes. Your network is secure."
-            type="success"
-            showIcon
-          />
+          <div className="alert-success">
+            <h4>🛡️ All Clear</h4>
+            <p>No security threats detected in the last few minutes. Your network is secure.</p>
+          </div>
         )}
 
-        <List
-          loading={loading}
-          dataSource={alerts}
-          renderItem={(alert, index) => {
-            const confidenceLevel = getConfidenceLevel(alert.confidence);
-            
-            return (
-              <List.Item key={index}>
-                <Card 
-                  size="small" 
-                  style={{ width: '100%' }}
-                  title={
-                    <Space>
-                      {getThreatTypeIcon(alert.threat_type)}
-                      <span style={{ fontWeight: '600' }}>
-                        {alert.threat_type.replace(/_/g, ' ')}
-                      </span>
-                      <Tag 
-                        color={getSeverityColor(alert.severity)}
-                        style={{ 
-                          color: 'white', 
+        <div className="alerts-container">
+          <List
+            loading={loading}
+            dataSource={alerts}
+            renderItem={(alert, index) => {
+              const confidenceLevel = getConfidenceLevel(alert.confidence);
+              
+              return (
+                <List.Item key={index} className="alert-item">
+                  <div className="alert-card">
+                    <div className="alert-header">
+                      <Space>
+                        {getThreatTypeIcon(alert.threat_type)}
+                        <span className="alert-title">
+                          {alert.threat_type.replace(/_/g, ' ')}
+                        </span>
+                        <Tag 
+                          color={getSeverityColor(alert.severity)}
+                          style={{ 
+                            color: 'white', 
+                            fontWeight: '600',
+                            border: 'none'
+                          }}
+                        >
+                          {alert.severity}
+                        </Tag>
+                      </Space>
+                      <Space>
+                        <Tag 
+                          color={confidenceLevel.color}
+                          style={{ 
+                            color: 'white', 
+                            fontWeight: '600',
+                            border: 'none'
+                          }}
+                        >
+                          {confidenceLevel.text} Confidence
+                        </Tag>
+                        <span className="alert-timestamp">
+                          {formatTimestamp(alert.timestamp)}
+                        </span>
+                      </Space>
+                    </div>
+                    
+                    <div className="alert-content">
+                      <div className="alert-detail">
+                        <strong>Source IP:</strong> 
+                        <code className="ip-code critical">
+                          {alert.source_ip}
+                        </code>
+                      </div>
+                      <div className="alert-detail">
+                        <strong>Description:</strong> {alert.description}
+                      </div>
+                      <div className="alert-detail">
+                        <strong>Confidence Score:</strong> 
+                        <span style={{ 
+                          color: confidenceLevel.color, 
                           fontWeight: '600',
-                          border: 'none'
-                        }}
-                      >
-                        {alert.severity}
-                      </Tag>
-                    </Space>
-                  }
-                  extra={
-                    <Space>
-                      <Tag 
-                        color={confidenceLevel.color}
-                        style={{ 
-                          color: 'white', 
-                          fontWeight: '600',
-                          border: 'none'
-                        }}
-                      >
-                        {confidenceLevel.text} Confidence
-                      </Tag>
-                      <span style={{ fontSize: '12px', color: '#666' }}>
-                        {formatTimestamp(alert.timestamp)}
-                      </span>
-                    </Space>
-                  }
-                >
-                  <div style={{ marginBottom: 8 }}>
-                    <strong>Source IP:</strong> 
-                    <code style={{ 
-                      background: 'rgba(255, 77, 79, 0.1)', 
-                      padding: '2px 6px', 
-                      borderRadius: '4px',
-                      color: '#ff4d4f',
-                      fontWeight: '600',
-                      marginLeft: '8px'
-                    }}>
-                      {alert.source_ip}
-                    </code>
+                          marginLeft: '8px'
+                        }}>
+                          {(alert.confidence * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                      
+                      {alert.raw_data && (
+                        <details className="raw-data-details">
+                          <summary>🔍 Raw Data Analysis</summary>
+                          <pre className="raw-data-pre">
+                            {JSON.stringify(alert.raw_data, null, 2)}
+                          </pre>
+                        </details>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ marginBottom: 8 }}>
-                    <strong>Description:</strong> {alert.description}
-                  </div>
-                  <div style={{ marginBottom: 8 }}>
-                    <strong>Confidence Score:</strong> 
-                    <span style={{ 
-                      color: confidenceLevel.color, 
-                      fontWeight: '600',
-                      marginLeft: '8px'
-                    }}>
-                      {(alert.confidence * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                  
-                  {alert.raw_data && (
-                    <details style={{ marginTop: 8 }}>
-                      <summary style={{ cursor: 'pointer', color: '#1890ff', fontWeight: '600' }}>
-                        🔍 Raw Data Analysis
-                      </summary>
-                      <pre style={{ 
-                        background: 'rgba(24, 144, 255, 0.05)', 
-                        padding: '12px', 
-                        marginTop: '8px',
-                        fontSize: '12px',
-                        overflow: 'auto',
-                        border: '1px solid rgba(24, 144, 255, 0.2)',
-                        borderRadius: '4px'
-                      }}>
-                        {JSON.stringify(alert.raw_data, null, 2)}
-                      </pre>
-                    </details>
-                  )}
-                </Card>
-              </List.Item>
-            );
-          }}
-        />
-      </Card>
+                </List.Item>
+              );
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };
