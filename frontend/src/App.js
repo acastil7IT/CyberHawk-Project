@@ -70,6 +70,7 @@ function App() {
           width={200}
           breakpoint="lg"
           collapsedWidth="0"
+          defaultCollapsed={window.innerWidth <= 768}
         >
           <div className="logo">
             <SafetyOutlined style={{ fontSize: '24px', color: 'white' }} />
