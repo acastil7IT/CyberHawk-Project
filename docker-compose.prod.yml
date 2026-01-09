@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-securenet}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - backend
+    restart: unless-stopped
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    networks:
+      - backend
+    restart: unless-stopped
+
+  # API Gateway
+  api-gateway:
+    build: ./services/api-gateway
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-securenet}
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - backend
+      - frontend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+
+  # Frontend Dashboard
+  dashboard:
+    build: ./frontend
+    environment:
+      - REACT_APP_API_URL=${API_URL:-http://localhost:8001}
+    networks:
+      - frontend
+    restart: unless-stopped
+    depends_on:
+      - api-gateway
+
+  # NGINX Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${PORT:-80}:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    networks:
+      - frontend
+    restart: unless-stopped
+    depends_on:
+      - dashboard
+      - api-gateway
+
+  # Network Discovery (Optional for cloud)
+  network-discovery:
+    build: ./services/network-discovery
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-securenet}
+    networks:
+      - backend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true

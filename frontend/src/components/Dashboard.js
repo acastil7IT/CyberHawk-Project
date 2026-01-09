@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, Table, Alert, Badge } from 'antd';
+import { Card, Row, Col, Table, Alert, Badge } from 'antd';
 import { 
   AlertOutlined, 
   GlobalOutlined, 
   SecurityScanOutlined,
-  ExclamationCircleOutlined,
   SafetyOutlined,
   EyeOutlined,
   BugOutlined,
@@ -51,20 +50,6 @@ const Dashboard = () => {
     const interval = setInterval(fetchData, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, []);
-
-  const topIPColumns = [
-    {
-      title: 'Source IP',
-      dataIndex: 'ip',
-      key: 'ip',
-    },
-    {
-      title: 'Packet Count',
-      dataIndex: 'count',
-      key: 'count',
-      sorter: (a, b) => a.count - b.count,
-    },
-  ];
 
   return (
     <div>

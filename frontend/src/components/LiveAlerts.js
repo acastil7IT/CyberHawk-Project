@@ -6,7 +6,6 @@ import {
   ThunderboltOutlined,
   BugOutlined,
   SecurityScanOutlined,
-  SafetyOutlined,
   EyeOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
