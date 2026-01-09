@@ -62,7 +62,7 @@ function App() {
         {/* Demo Banner */}
         <div className="demo-banner">
           <SafetyOutlined style={{ marginRight: 8 }} />
-          SecureNet Monitor v2.1 | Live Network Security Platform | Alejandro Castillo - Cybersecurity Portfolio
+          CyberHawk v3.0 | Intelligent Threat Hunting Platform | Alejandro Castillo - Cybersecurity Portfolio
         </div>
         
         <Sider
@@ -73,7 +73,7 @@ function App() {
         >
           <div className="logo">
             <SafetyOutlined style={{ fontSize: '24px', color: 'white' }} />
-            <span className="logo-text">SecureNet</span>
+            <span className="logo-text">CyberHawk</span>
           </div>
           <Menu
             className="securenet-menu"
@@ -89,7 +89,7 @@ function App() {
         <Layout>
           <Header className="securenet-header">
             <div className="header-title">
-              Network Security Operations Center
+              CyberHawk Security Operations Center
             </div>
           </Header>
           
