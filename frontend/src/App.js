@@ -62,7 +62,7 @@ function App() {
         {/* Demo Banner */}
         <div className="demo-banner">
           <SafetyOutlined style={{ marginRight: 8 }} />
-          CyberHawk v3.0 | Intelligent Threat Hunting Platform | Alejandro Castillo - Cybersecurity Portfolio
+          CyberHawk v3.0 | Intelligent Threat Hunting Platform
         </div>
         
         <Sider
