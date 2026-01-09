@@ -672,9 +672,9 @@ const AdvancedScanning = () => {
             <Badge count={deviceStats.total} style={{ marginLeft: 8 }} />
           </span>
         } key="devices">
-          <Card 
-            title="Discovered Network Devices" 
-            extra={
+          <div className="devices-section">
+            <div className="section-header">
+              <h4>Discovered Network Devices</h4>
               <Button 
                 icon={<ScanOutlined />} 
                 onClick={loadNetworkDevices}
@@ -682,45 +682,34 @@ const AdvancedScanning = () => {
               >
                 Refresh
               </Button>
-            }
-          >
-            <div style={{ marginBottom: 16 }}>
-              <Row gutter={16}>
-                <Col span={6}>
-                  <Card size="small" style={{ textAlign: 'center' }}>
-                    <div style={{ color: '#52c41a', fontSize: 18, fontWeight: 'bold' }}>
-                      {deviceStats.online}
-                    </div>
-                    <div>Online</div>
-                  </Card>
-                </Col>
-                <Col span={6}>
-                  <Card size="small" style={{ textAlign: 'center' }}>
-                    <div style={{ color: '#f5222d', fontSize: 18, fontWeight: 'bold' }}>
-                      {deviceStats.offline}
-                    </div>
-                    <div>Offline</div>
-                  </Card>
-                </Col>
-                <Col span={6}>
-                  <Card size="small" style={{ textAlign: 'center' }}>
-                    <div style={{ color: '#fa8c16', fontSize: 18, fontWeight: 'bold' }}>
-                      {networkDevices.filter(d => (d.risk_score || 0) >= 4).length}
-                    </div>
-                    <div>High Risk</div>
-                  </Card>
-                </Col>
-                <Col span={6}>
-                  <Card size="small" style={{ textAlign: 'center' }}>
-                    <div style={{ color: '#1890ff', fontSize: 18, fontWeight: 'bold' }}>
-                      {deviceStats.new_today}
-                    </div>
-                    <div>New Today</div>
-                  </Card>
-                </Col>
-              </Row>
             </div>
             
+            <div className="device-stats">
+              <div className="device-stat">
+                <div className="stat-value" style={{ color: '#52c41a' }}>
+                  {deviceStats.online}
+                </div>
+                <div className="stat-label">Online</div>
+              </div>
+              <div className="device-stat">
+                <div className="stat-value" style={{ color: '#f5222d' }}>
+                  {deviceStats.offline}
+                </div>
+                <div className="stat-label">Offline</div>
+              </div>
+              <div className="device-stat">
+                <div className="stat-value" style={{ color: '#fa8c16' }}>
+                  {networkDevices.filter(d => (d.risk_score || 0) >= 4).length}
+                </div>
+                <div className="stat-label">High Risk</div>
+              </div>
+              <div className="device-stat">
+                <div className="stat-value" style={{ color: '#1890ff' }}>
+                  {deviceStats.new_today}
+                </div>
+                <div className="stat-label">New Today</div>
+              </div>
+            </div>
             <Table
               columns={deviceColumns}
               dataSource={networkDevices}
@@ -728,84 +717,80 @@ const AdvancedScanning = () => {
               pagination={{ pageSize: 10 }}
               size="small"
               rowKey="id"
+              className="cyberhawk-table"
             />
-          </Card>
+          </div>
         </TabPane>
 
         <TabPane tab="🔍 Scan Results" key="results">
-          <Card title="Latest Scan Results">
+          <div className="scan-results-section">
+            <h4>Latest Scan Results</h4>
             {scanResults.length > 0 ? (
               <Table
                 columns={scanResultColumns}
                 dataSource={scanResults}
                 pagination={false}
                 size="small"
+                className="cyberhawk-table"
               />
             ) : (
-              <div style={{ textAlign: 'center', padding: 40 }}>
+              <div className="empty-state">
                 <ScanOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
-                <p style={{ marginTop: 16, color: '#999' }}>
-                  No scan results yet. Start a scan to see findings here.
-                </p>
+                <p>No scan results yet. Start a scan to see findings here.</p>
               </div>
             )}
-          </Card>
+          </div>
         </TabPane>
 
         <TabPane tab="📋 Recent Scans" key="history">
-          <Card title="Scan History">
+          <div className="scan-history-section">
+            <h4>Scan History</h4>
             <Table
               columns={recentScansColumns}
               dataSource={recentScans}
               pagination={false}
               size="small"
+              className="cyberhawk-table"
             />
-          </Card>
+          </div>
         </TabPane>
 
         <TabPane tab="🛠️ Tools" key="tools">
-          <Card title="Available Security Tools">
-            <Row gutter={16}>
-              <Col span={8}>
-                <Card size="small" title="Nmap">
-                  <p>Network discovery and port scanning</p>
-                  <Tag color="green">Active</Tag>
-                </Card>
-              </Col>
-              <Col span={8}>
-                <Card size="small" title="Wireshark">
-                  <p>Packet capture and analysis</p>
-                  <Tag color="green">Active</Tag>
-                </Card>
-              </Col>
-              <Col span={8}>
-                <Card size="small" title="Nikto">
-                  <p>Web vulnerability scanner</p>
-                  <Tag color="green">Active</Tag>
-                </Card>
-              </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 16 }}>
-              <Col span={8}>
-                <Card size="small" title="Dirb">
-                  <p>Directory enumeration</p>
-                  <Tag color="green">Active</Tag>
-                </Card>
-              </Col>
-              <Col span={8}>
-                <Card size="small" title="Masscan">
-                  <p>High-speed port scanner</p>
-                  <Tag color="green">Active</Tag>
-                </Card>
-              </Col>
-              <Col span={8}>
-                <Card size="small" title="SQLMap">
-                  <p>SQL injection testing</p>
-                  <Tag color="green">Active</Tag>
-                </Card>
-              </Col>
-            </Row>
-          </Card>
+          <div className="tools-section">
+            <h4>Available Security Tools</h4>
+            <div className="tools-grid">
+              <div className="tool-card">
+                <h5>Nmap</h5>
+                <p>Network discovery and port scanning</p>
+                <Tag color="green">Active</Tag>
+              </div>
+              <div className="tool-card">
+                <h5>Wireshark</h5>
+                <p>Packet capture and analysis</p>
+                <Tag color="green">Active</Tag>
+              </div>
+              <div className="tool-card">
+                <h5>Nikto</h5>
+                <p>Web vulnerability scanner</p>
+                <Tag color="green">Active</Tag>
+              </div>
+              <div className="tool-card">
+                <h5>Dirb</h5>
+                <p>Directory enumeration</p>
+                <Tag color="green">Active</Tag>
+              </div>
+              <div className="tool-card">
+                <h5>Masscan</h5>
+                <p>High-speed port scanner</p>
+                <Tag color="green">Active</Tag>
+              </div>
+              <div className="tool-card">
+                <h5>SQLMap</h5>
+                <p>SQL injection testing</p>
+                <Tag color="green">Active</Tag>
+              </div>
+            </div>
+          </div>
         </TabPane>
         </Tabs>
       </div>
