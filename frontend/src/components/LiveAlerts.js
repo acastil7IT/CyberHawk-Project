@@ -8,7 +8,6 @@ import {
   SecurityScanOutlined,
   EyeOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
 import mockApi from '../services/mockApi';
 import moment from 'moment';
 
