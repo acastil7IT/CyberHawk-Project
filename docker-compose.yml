@@ -1,147 +1,44 @@
-version: '3.8'
-
 services:
   # Database
-  postgres:
-    image: postgres:15
+  db:
+    image: postgres:13-alpine
     environment:
-      POSTGRES_DB: securenet
-      POSTGRES_USER: admin
+      POSTGRES_DB: cyberhawk_db
+      POSTGRES_USER: cyberhawk
       POSTGRES_PASSWORD: secure123
+    ports:
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5433:5432"  # Changed to avoid conflict
-
-  # Redis for caching and message queue
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-
-  # Elasticsearch for log storage
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-
-  # Traffic Analyzer Service
-  traffic-analyzer:
-    build: ./services/traffic-analyzer
-    privileged: true
-    network_mode: host
-    depends_on:
-      - postgres
-      - redis
-    volumes:
-      - ./logs:/app/logs
-    environment:
-      - DATABASE_URL=postgresql://admin:secure123@localhost:5433/securenet
-      - REDIS_URL=redis://localhost:6379
-
-  # Threat Detection Engine
-  threat-detector:
-    build: ./services/threat-detector
-    depends_on:
-      - postgres
-      - redis
-      - elasticsearch
-    environment:
-      - DATABASE_URL=postgresql://admin:secure123@postgres:5432/securenet
-      - REDIS_URL=redis://redis:6379
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./database/sample_data.sql:/docker-entrypoint-initdb.d/02-sample.sql
 
   # API Gateway
   api-gateway:
-    build: ./services/api-gateway
+    build: 
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
     ports:
-      - "8001:8000"  # Changed to avoid conflict
-    depends_on:
-      - postgres
-      - redis
+      - "8001:8001"
     environment:
-      - DATABASE_URL=postgresql://admin:secure123@postgres:5432/securenet
-      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://cyberhawk:secure123@db:5432/cyberhawk_db
+    depends_on:
+      - db
+    volumes:
+      - ./services/api-gateway:/app
 
   # Frontend Dashboard
   dashboard:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    depends_on:
-      - api-gateway
     environment:
       - REACT_APP_API_URL=http://localhost:8001
-
-  # NGINX Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/etc/nginx/ssl
+      - GENERATE_SOURCEMAP=false
     depends_on:
-      - dashboard
       - api-gateway
-
-  # Advanced Security Tools Container
-  security-tools:
-    build: ./services/security-tools
-    privileged: true
-    network_mode: host
-    depends_on:
-      - postgres
-      - test-targets
-    volumes:
-      - ./security-results:/app/results
-    environment:
-      - DATABASE_URL=postgresql://admin:secure123@localhost:5433/securenet
-    command: ["sleep", "infinity"]  # Keep container running for manual scans
-
-  # Vulnerable Test Environment
-  test-targets:
-    build: ./services/test-targets
-    ports:
-      - "2222:22"    # SSH
-      - "8080:80"    # HTTP
-      - "8081:8080"  # Vulnerable web app
-      - "2121:21"    # FTP
-      - "3307:3306"  # MySQL
-    environment:
-      - MYSQL_ROOT_PASSWORD=vulnerable123
-
-  # Network Discovery Service
-  network-discovery:
-    build: ./services/network-discovery
-    privileged: true
-    network_mode: host
-    depends_on:
-      - postgres
-    environment:
-      - DATABASE_URL=postgresql://admin:secure123@localhost:5433/securenet
-    restart: unless-stopped
-
-  # Grafana for metrics
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3001:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin123
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./grafana/datasources:/etc/grafana/provisioning/datasources
 
 volumes:
   postgres_data:
-  es_data:
-  grafana_data:

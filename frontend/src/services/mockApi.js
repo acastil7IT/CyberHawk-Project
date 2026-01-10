@@ -94,17 +94,59 @@ const mockAlerts = {
   alerts: [
     {
       id: 1,
-      type: 'SECURITY',
-      message: 'Port scan detected from 192.168.1.100',
+      threat_type: 'PORT_SCAN',
+      severity: 'HIGH',
+      source_ip: '192.168.1.100',
+      description: 'Suspicious port scanning activity detected from internal network',
+      confidence: 0.85,
       timestamp: new Date(Date.now() - 300000).toISOString(),
-      severity: 'HIGH'
+      raw_data: {
+        ports_scanned: ['22', '80', '443', '3389'],
+        scan_duration: '45 seconds',
+        packets_sent: 156
+      }
     },
     {
       id: 2,
-      type: 'NETWORK',
-      message: 'High bandwidth usage detected',
+      threat_type: 'BRUTE_FORCE_ATTACK',
+      severity: 'CRITICAL',
+      source_ip: '10.0.0.50',
+      description: 'Multiple failed SSH login attempts detected',
+      confidence: 0.92,
       timestamp: new Date(Date.now() - 600000).toISOString(),
-      severity: 'MEDIUM'
+      raw_data: {
+        failed_attempts: 25,
+        target_service: 'SSH',
+        usernames_tried: ['admin', 'root', 'user']
+      }
+    },
+    {
+      id: 3,
+      threat_type: 'NETWORK_ANOMALY',
+      severity: 'MEDIUM',
+      source_ip: '172.16.0.25',
+      description: 'Unusual network traffic pattern detected',
+      confidence: 0.67,
+      timestamp: new Date(Date.now() - 900000).toISOString(),
+      raw_data: {
+        traffic_volume: '150% above normal',
+        protocol: 'TCP',
+        destination_ports: ['8080', '9000']
+      }
+    },
+    {
+      id: 4,
+      threat_type: 'MALWARE_COMMUNICATION',
+      severity: 'HIGH',
+      source_ip: '192.168.1.75',
+      description: 'Potential malware communication detected',
+      confidence: 0.78,
+      timestamp: new Date(Date.now() - 1200000).toISOString(),
+      raw_data: {
+        suspicious_domains: ['malicious-site.com'],
+        data_transferred: '2.5 MB',
+        encryption: 'Unknown protocol'
+      }
     }
   ]
 };

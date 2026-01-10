@@ -754,44 +754,6 @@ const AdvancedScanning = () => {
             />
           </div>
         </TabPane>
-
-        <TabPane tab="Tools" key="tools">
-          <div className="tools-section">
-            <h4>Available Security Tools</h4>
-            <div className="tools-grid">
-              <div className="tool-card">
-                <h5>Nmap</h5>
-                <p>Network discovery and port scanning</p>
-                <Tag color="green">Active</Tag>
-              </div>
-              <div className="tool-card">
-                <h5>Wireshark</h5>
-                <p>Packet capture and analysis</p>
-                <Tag color="green">Active</Tag>
-              </div>
-              <div className="tool-card">
-                <h5>Nikto</h5>
-                <p>Web vulnerability scanner</p>
-                <Tag color="green">Active</Tag>
-              </div>
-              <div className="tool-card">
-                <h5>Dirb</h5>
-                <p>Directory enumeration</p>
-                <Tag color="green">Active</Tag>
-              </div>
-              <div className="tool-card">
-                <h5>Masscan</h5>
-                <p>High-speed port scanner</p>
-                <Tag color="green">Active</Tag>
-              </div>
-              <div className="tool-card">
-                <h5>SQLMap</h5>
-                <p>SQL injection testing</p>
-                <Tag color="green">Active</Tag>
-              </div>
-            </div>
-          </div>
-        </TabPane>
         </Tabs>
       </div>
     </div>
