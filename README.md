@@ -8,24 +8,24 @@
 
 **Professional-grade cybersecurity monitoring and threat detection platform**
 
-[🚀 Live Demo](https://updated-network-security-pj-j85o-q924y25nb-acastil7its-projects.vercel.app) • [📖 Documentation](docs/) • [🛡️ Security Features](#features)
+[Live Demo](https://updated-network-security-pj-j85o-q924y25nb-acastil7its-projects.vercel.app) • [Documentation](docs/) • [Security Features](#features)
 
 </div>
 
-## 🎯 Overview
+## Overview
 
 CyberHawk is an enterprise-grade cybersecurity platform that provides real-time network monitoring, threat detection, and incident response capabilities. Built with modern web technologies and professional security tools integration.
 
-### ✨ Key Features
+### Key Features
 
-- **🔍 Real-time Threat Detection** - Advanced monitoring with ML-powered analysis
-- **📊 Professional Dashboard** - Clean, intuitive security operations center
-- **🌐 Network Discovery** - Automated asset discovery and monitoring
-- **⚡ Live Alerts** - Instant threat notifications and response
-- **🛠️ Security Tools Integration** - Nmap, Wireshark, Nikto, and more
-- **📈 Incident Management** - Complete threat lifecycle tracking
+- **Real-time Threat Detection** - Advanced monitoring with ML-powered analysis
+- **Professional Dashboard** - Clean, intuitive security operations center
+- **Network Discovery** - Automated asset discovery and monitoring
+- **Live Alerts** - Instant threat notifications and response
+- **Security Tools Integration** - Nmap, Wireshark, Nikto, and more
+- **Incident Management** - Complete threat lifecycle tracking
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Docker & Docker Compose
@@ -48,28 +48,28 @@ CyberHawk is an enterprise-grade cybersecurity platform that provides real-time 
    - Web Interface: http://localhost:3000
    - API Gateway: http://localhost:8001
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 CyberHawk/
-├── 📱 frontend/              # React.js web interface
+├── frontend/              # React.js web interface
 │   ├── src/components/       # UI components
 │   ├── src/services/         # API services
 │   └── public/              # Static assets
-├── 🔧 services/             # Backend microservices
+├── services/             # Backend microservices
 │   ├── api-gateway/         # Main API gateway
 │   ├── threat-detector/     # Threat analysis engine
 │   ├── traffic-analyzer/    # Network traffic analysis
 │   ├── network-discovery/   # Device discovery service
 │   └── security-tools/      # Security tools integration
-├── 🗄️ database/            # Database schemas and data
-├── 📚 docs/                # Documentation
-├── 🎮 demos/               # Demo scripts and examples
-├── 📜 scripts/             # Deployment and setup scripts
-└── 🐳 Docker files         # Container configurations
+├── database/            # Database schemas and data
+├── docs/                # Documentation
+├── demos/               # Demo scripts and examples
+├── scripts/             # Deployment and setup scripts
+└── Docker files         # Container configurations
 ```
 
-## 🛡️ Security Features
+## Security Features
 
 ### Threat Intelligence
 - **Real-time Monitoring** - Continuous network surveillance
@@ -89,7 +89,7 @@ CyberHawk/
 - **Nikto Scanning** - Web vulnerability assessment
 - **Custom Security Tools** - Extensible tool framework
 
-## 🎮 Demo & Testing
+## Demo & Testing
 
 ### Attack Simulation
 ```bash
@@ -105,7 +105,7 @@ python3 demos/traffic_injector.py
 - Use the built-in web-based attack simulations
 - Monitor results in **Live Threats** and **Network Monitor** sections
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Setup
 Copy `.env.example` to `.env` and configure:
@@ -123,7 +123,7 @@ cp .env.example .env
 - Rate limiting and request validation
 - Secure communication between services
 
-## 📊 Monitoring & Analytics
+## Monitoring & Analytics
 
 ### Dashboard Features
 - **Command Center** - Executive security overview
@@ -139,7 +139,7 @@ cp .env.example .env
 - Performance metrics
 - Security posture assessment
 
-## 🚀 Deployment
+## Deployment
 
 ### Local Development
 ```bash
@@ -164,7 +164,7 @@ curl http://localhost:8001/health
 - **Railway** - Full-stack deployment
 - **AWS/GCP/Azure** - Enterprise deployment
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -172,26 +172,22 @@ curl http://localhost:8001/health
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔗 Links
+## Links
 
 - **Live Demo**: https://updated-network-security-pj-j85o-q924y25nb-acastil7its-projects.vercel.app
 - **Repository**: https://github.com/acastil7IT/Updated-Network-Security-PJ
 - **Documentation**: [docs/](docs/)
 - **Issues**: [GitHub Issues](https://github.com/acastil7IT/Updated-Network-Security-PJ/issues)
 
-## 📞 Support
-
-For support, email security@cyberhawk.dev or join our [Discord community](https://discord.gg/cyberhawk).
-
 ---
 
 <div align="center">
 
-**Built with ❤️ for cybersecurity professionals**
+**Built with care for cybersecurity professionals**
 
 [![GitHub stars](https://img.shields.io/github/stars/acastil7IT/Updated-Network-Security-PJ?style=social)](https://github.com/acastil7IT/Updated-Network-Security-PJ/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/acastil7IT/Updated-Network-Security-PJ?style=social)](https://github.com/acastil7IT/Updated-Network-Security-PJ/network/members)
