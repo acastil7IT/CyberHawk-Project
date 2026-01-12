@@ -25,14 +25,6 @@ Generates realistic network traffic patterns for testing traffic analysis.
 python3 demos/traffic_injector.py
 ```
 
-### 3. **clear_mock_incidents.py**
-Utility script to clean up test data and reset the system for clean demonstrations.
-
-**Usage:**
-```bash
-python3 demos/clear_mock_incidents.py
-```
-
 ## 🚀 Quick Start
 
 For a complete security demonstration, run:
@@ -50,10 +42,10 @@ Then monitor the results in:
 - Only use these scripts on systems you own or have permission to test
 - All simulations are designed for demonstration purposes
 - Scripts generate realistic but safe attack patterns
-- Results are logged in the CyberHawk monitoring system
+- Results work with both local Docker deployment and cloud deployment
 
 ## 🔧 Requirements
 
 - Python 3.7+
-- CyberHawk platform running (docker compose up -d)
-- Network access to localhost services
+- No external dependencies required
+- Works with standalone frontend or full Docker deployment
