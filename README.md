@@ -4,11 +4,11 @@
 
 ![CyberHawk Logo](https://img.shields.io/badge/CyberHawk-v3.0-blue?style=for-the-badge&logo=shield&logoColor=white)
 [![Security](https://img.shields.io/badge/Security-Enterprise-red?style=for-the-badge)](https://github.com/acastil7IT/Updated-Network-Security-PJ)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-green?style=for-the-badge)](https://updated-network-security-pj-j85o-q924y25nb-acastil7its-projects.vercel.app)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-green?style=for-the-badge)](https://updated-network-security-pj-rtms.vercel.app)
 
 **Professional-grade cybersecurity monitoring and threat detection platform**
 
-[Live Demo](https://updated-network-security-pj-j85o-q924y25nb-acastil7its-projects.vercel.app) • [Documentation](docs/) • [Security Features](#features)
+[Live Demo](https://updated-network-security-pj-rtms.vercel.app) • [Documentation](docs/) • [Security Features](#features)
 
 </div>
 
@@ -107,7 +107,7 @@ npm start
 ```
 
 #### Option 3: Live Demo (No Installation)
-Visit: [https://updated-network-security-pj-j85o-q924y25nb-acastil7its-projects.vercel.app](https://updated-network-security-pj-j85o-q924y25nb-acastil7its-projects.vercel.app)
+Visit: [https://updated-network-security-pj-rtms.vercel.app](https://updated-network-security-pj-rtms.vercel.app)
 
 ## Project Structure
 
@@ -317,7 +317,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Links
 
-- **Live Demo**: https://updated-network-security-pj-j85o-q924y25nb-acastil7its-projects.vercel.app
+- **Live Demo**: https://updated-network-security-pj-rtms.vercel.app
 - **Repository**: https://github.com/acastil7IT/Updated-Network-Security-PJ
 - **Documentation**: [docs/](docs/)
 - **Issues**: [GitHub Issues](https://github.com/acastil7IT/Updated-Network-Security-PJ/issues)
