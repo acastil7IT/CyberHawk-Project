@@ -6,8 +6,7 @@ import {
   UploadOutlined,
   SecurityScanOutlined,
   BugOutlined,
-  SafetyOutlined,
-  HistoryOutlined
+  SafetyOutlined
 } from '@ant-design/icons';
 
 import Dashboard from './components/Dashboard';

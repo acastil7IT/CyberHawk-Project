@@ -7,8 +7,7 @@ import {
   EyeOutlined,
   HistoryOutlined,
   InfoCircleOutlined,
-  WarningOutlined,
-  CheckCircleOutlined
+  WarningOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
 
