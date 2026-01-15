@@ -98,18 +98,3 @@ function App() {
 }
 
 export default App;
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/traffic" element={<NetworkTraffic />} />
-              <Route path="/alerts" element={<LiveAlerts />} />
-              <Route path="/security-tools" element={<AdvancedScanning />} />
-              <Route path="/advanced-scanning" element={<AdvancedScanning />} />
-              <Route path="/network-discovery" element={<AdvancedScanning />} />
-            </Routes>
-          </Content>
-        </Layout>
-      </Layout>
-    </Router>
-  );
-}
-
-export default App;

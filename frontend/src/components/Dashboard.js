@@ -248,16 +248,28 @@ const Dashboard = () => {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ padding: '24px', maxWidth: '1600px', margin: '0 auto' }}>
       {/* Header with Upload Button */}
-      <Row justify="space-between" align="middle" style={{ marginBottom: '20px' }}>
+      <Row justify="space-between" align="middle" style={{ marginBottom: '32px' }}>
         <Col>
-          <h1 style={{ margin: 0, color: '#1e293b' }}>
-            <SafetyOutlined style={{ marginRight: '10px', color: '#00d4ff' }} />
+          <h1 style={{ 
+            margin: 0, 
+            color: '#1e293b', 
+            fontSize: '32px', 
+            fontWeight: '700',
+            letterSpacing: '-0.5px',
+            lineHeight: '1.2'
+          }}>
+            <SafetyOutlined style={{ marginRight: '12px', color: '#0ea5e9' }} />
             CyberHawk Defensive Security Analysis
           </h1>
-          <p style={{ margin: '5px 0', color: '#64748b' }}>
-            Network Security Analysis Platform - Simulated Dataset Mode
+          <p style={{ 
+            margin: '8px 0 0 0', 
+            color: '#64748b',
+            fontSize: '16px',
+            lineHeight: '1.5'
+          }}>
+            Network Security Analysis Platform • Simulated Dataset Mode
           </p>
         </Col>
         <Col>
@@ -266,6 +278,15 @@ const Dashboard = () => {
             icon={<UploadOutlined />}
             onClick={() => setUploadModalVisible(true)}
             size="large"
+            style={{
+              height: '48px',
+              fontSize: '16px',
+              fontWeight: '600',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+              border: 'none',
+              boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
+            }}
           >
             Upload Nmap Scan
           </Button>
@@ -278,52 +299,188 @@ const Dashboard = () => {
           description={error + " - Using simulated data for demo"}
           type="warning"
           showIcon
-          style={{ marginBottom: '20px' }}
+          style={{ 
+            marginBottom: '24px',
+            borderRadius: '12px',
+            border: '1px solid #fbbf24'
+          }}
         />
       )}
 
       {/* Statistics Cards */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '20px' }}>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <HistoryOutlined style={{ fontSize: '24px', color: '#1890ff', marginRight: '12px' }} />
-              <div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.total_sessions}</div>
-                <div style={{ color: '#8c8c8c' }}>Scan Sessions</div>
+      <Row gutter={[24, 24]} style={{ marginBottom: '32px' }}>
+        <Col xs={24} sm={12} lg={6}>
+          <Card 
+            bordered={false}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+                color: '#ffffff'
+              }}>
+                <HistoryOutlined />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ 
+                  fontSize: '28px', 
+                  fontWeight: '700',
+                  color: '#1e293b',
+                  lineHeight: '1',
+                  marginBottom: '6px'
+                }}>
+                  {stats.total_sessions}
+                </div>
+                <div style={{ 
+                  color: '#64748b',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  Scan Sessions
+                </div>
               </div>
             </div>
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <GlobalOutlined style={{ fontSize: '24px', color: '#52c41a', marginRight: '12px' }} />
-              <div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.total_hosts}</div>
-                <div style={{ color: '#8c8c8c' }}>Discovered Hosts</div>
+        <Col xs={24} sm={12} lg={6}>
+          <Card 
+            bordered={false}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+                color: '#ffffff'
+              }}>
+                <GlobalOutlined />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ 
+                  fontSize: '28px', 
+                  fontWeight: '700',
+                  color: '#1e293b',
+                  lineHeight: '1',
+                  marginBottom: '6px'
+                }}>
+                  {stats.total_hosts}
+                </div>
+                <div style={{ 
+                  color: '#64748b',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  Discovered Hosts
+                </div>
               </div>
             </div>
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <AlertOutlined style={{ fontSize: '24px', color: '#ff4d4f', marginRight: '12px' }} />
-              <div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.high_risk_hosts}</div>
-                <div style={{ color: '#8c8c8c' }}>High Risk Hosts</div>
+        <Col xs={24} sm={12} lg={6}>
+          <Card 
+            bordered={false}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+                color: '#ffffff'
+              }}>
+                <AlertOutlined />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ 
+                  fontSize: '28px', 
+                  fontWeight: '700',
+                  color: '#1e293b',
+                  lineHeight: '1',
+                  marginBottom: '6px'
+                }}>
+                  {stats.high_risk_hosts}
+                </div>
+                <div style={{ 
+                  color: '#64748b',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  High Risk Hosts
+                </div>
               </div>
             </div>
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <BugOutlined style={{ fontSize: '24px', color: '#fa8c16', marginRight: '12px' }} />
-              <div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.total_incidents}</div>
-                <div style={{ color: '#8c8c8c' }}>Security Incidents</div>
+        <Col xs={24} sm={12} lg={6}>
+          <Card 
+            bordered={false}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+                color: '#ffffff'
+              }}>
+                <BugOutlined />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ 
+                  fontSize: '28px', 
+                  fontWeight: '700',
+                  color: '#1e293b',
+                  lineHeight: '1',
+                  marginBottom: '6px'
+                }}>
+                  {stats.total_incidents}
+                </div>
+                <div style={{ 
+                  color: '#64748b',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  Security Incidents
+                </div>
               </div>
             </div>
           </Card>
@@ -331,16 +488,34 @@ const Dashboard = () => {
       </Row>
 
       {/* Risk Distribution Chart */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '20px' }}>
+      <Row gutter={[24, 24]} style={{ marginBottom: '32px' }}>
         <Col xs={24} lg={12}>
-          <Card title="Host Risk Distribution" extra={<SecurityScanOutlined />}>
-            <ResponsiveContainer width="100%" height={200}>
+          <Card 
+            title={
+              <span style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
+                <SecurityScanOutlined style={{ marginRight: '8px', color: '#0ea5e9' }} />
+                Host Risk Distribution
+              </span>
+            }
+            bordered={false}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}
+            headStyle={{
+              borderBottom: '1px solid #e2e8f0',
+              padding: '20px 24px'
+            }}
+            bodyStyle={{ padding: '24px' }}
+          >
+            <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie
                   data={riskDistributionData}
                   cx="50%"
                   cy="50%"
-                  outerRadius={80}
+                  outerRadius={90}
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}`}
                 >
@@ -354,20 +529,58 @@ const Dashboard = () => {
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Recent Activity" extra={<EyeOutlined />}>
-            <div style={{ height: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Card 
+            title={
+              <span style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
+                <EyeOutlined style={{ marginRight: '8px', color: '#0ea5e9' }} />
+                Recent Activity
+              </span>
+            }
+            bordered={false}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}
+            headStyle={{
+              borderBottom: '1px solid #e2e8f0',
+              padding: '20px 24px'
+            }}
+            bodyStyle={{ padding: '24px' }}
+          >
+            <div style={{ minHeight: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px' }}>
               {stats.recent_sessions.length > 0 ? (
                 stats.recent_sessions.map((session, index) => (
-                  <div key={index} style={{ marginBottom: '10px', padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
-                    <div style={{ fontWeight: 'bold' }}>{session.filename}</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
-                      {session.total_hosts} hosts, {session.high_risk_ports} high-risk ports
+                  <div 
+                    key={index} 
+                    style={{ 
+                      padding: '16px', 
+                      background: '#f8fafc', 
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0'
+                    }}
+                  >
+                    <div style={{ 
+                      fontWeight: '600',
+                      color: '#1e293b',
+                      marginBottom: '6px',
+                      fontSize: '15px'
+                    }}>
+                      {session.filename}
+                    </div>
+                    <div style={{ 
+                      fontSize: '13px', 
+                      color: '#64748b',
+                      lineHeight: '1.5'
+                    }}>
+                      {session.total_hosts} hosts discovered • {session.high_risk_ports} high-risk ports detected
                     </div>
                   </div>
                 ))
               ) : (
-                <div style={{ textAlign: 'center', color: '#8c8c8c' }}>
-                  No recent scan sessions
+                <div style={{ textAlign: 'center', color: '#94a3b8', padding: '40px 0' }}>
+                  <HistoryOutlined style={{ fontSize: '48px', marginBottom: '12px', opacity: 0.5 }} />
+                  <p style={{ margin: 0, fontSize: '15px' }}>No recent scan sessions</p>
                 </div>
               )}
             </div>
@@ -376,26 +589,67 @@ const Dashboard = () => {
       </Row>
 
       {/* Data Tables */}
-      <Tabs defaultActiveKey="sessions">
-        <TabPane tab="Scan Sessions" key="sessions">
-          <Card title="Scan Session History" extra={<HistoryOutlined />}>
+      <Tabs 
+        defaultActiveKey="sessions"
+        style={{ marginBottom: '24px' }}
+        tabBarStyle={{
+          marginBottom: '24px',
+          borderBottom: '2px solid #e2e8f0'
+        }}
+      >
+        <TabPane 
+          tab={
+            <span style={{ fontSize: '15px', fontWeight: '500', padding: '8px 16px' }}>
+              <HistoryOutlined style={{ marginRight: '8px' }} />
+              Scan Sessions
+            </span>
+          } 
+          key="sessions"
+        >
+          <Card 
+            bordered={false}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}
+            bodyStyle={{ padding: '0' }}
+          >
             <Table
               columns={sessionColumns}
               dataSource={scanSessions}
               rowKey="id"
-              pagination={{ pageSize: 10 }}
-              size="small"
+              pagination={{ pageSize: 10, showSizeChanger: false }}
+              size="middle"
+              style={{ borderRadius: '12px', overflow: 'hidden' }}
             />
           </Card>
         </TabPane>
-        <TabPane tab="Security Incidents" key="incidents">
-          <Card title="Security Incidents" extra={<AlertOutlined />}>
+        <TabPane 
+          tab={
+            <span style={{ fontSize: '15px', fontWeight: '500', padding: '8px 16px' }}>
+              <AlertOutlined style={{ marginRight: '8px' }} />
+              Security Incidents
+            </span>
+          } 
+          key="incidents"
+        >
+          <Card 
+            bordered={false}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}
+            bodyStyle={{ padding: '0' }}
+          >
             <Table
               columns={incidentColumns}
               dataSource={incidents}
               rowKey="id"
-              pagination={{ pageSize: 10 }}
-              size="small"
+              pagination={{ pageSize: 10, showSizeChanger: false }}
+              size="middle"
+              style={{ borderRadius: '12px', overflow: 'hidden' }}
             />
           </Card>
         </TabPane>
@@ -403,345 +657,88 @@ const Dashboard = () => {
 
       {/* Upload Modal */}
       <Modal
-        title="Upload Nmap Scan Results"
+        title={
+          <span style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
+            <UploadOutlined style={{ marginRight: '8px', color: '#0ea5e9' }} />
+            Upload Nmap Scan Results
+          </span>
+        }
         visible={uploadModalVisible}
         onCancel={() => setUploadModalVisible(false)}
         footer={null}
         width={600}
+        bodyStyle={{ padding: '24px' }}
       >
         <Alert
           message="Authorized Scanning Only"
           description="Only upload scan results from networks you own or are authorized to test. CyberHawk performs no live scanning."
           type="info"
           showIcon
-          style={{ marginBottom: '20px' }}
+          style={{ 
+            marginBottom: '24px',
+            borderRadius: '8px',
+            border: '1px solid #0ea5e9'
+          }}
         />
         
         <Form layout="vertical">
-          <Form.Item label="Scan Notes (Optional)">
+          <Form.Item 
+            label={
+              <span style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px' }}>
+                Scan Notes (Optional)
+              </span>
+            }
+          >
             <TextArea
               id="upload-notes"
               placeholder="Add notes about this scan session..."
               rows={3}
+              style={{
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
             />
           </Form.Item>
           
-          <Form.Item label="Nmap XML File">
+          <Form.Item 
+            label={
+              <span style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px' }}>
+                Nmap XML File
+              </span>
+            }
+          >
             <Upload.Dragger
               name="file"
               customRequest={handleUpload}
               accept=".xml"
               maxCount={1}
               loading={uploading}
+              style={{
+                borderRadius: '8px',
+                border: '2px dashed #cbd5e1'
+              }}
             >
               <p className="ant-upload-drag-icon">
-                <FileTextOutlined />
+                <FileTextOutlined style={{ color: '#0ea5e9', fontSize: '48px' }} />
               </p>
-              <p className="ant-upload-text">Click or drag Nmap XML file to upload</p>
-              <p className="ant-upload-hint">
+              <p className="ant-upload-text" style={{ 
+                fontSize: '16px', 
+                fontWeight: '600',
+                color: '#1e293b',
+                marginBottom: '8px'
+              }}>
+                Click or drag Nmap XML file to upload
+              </p>
+              <p className="ant-upload-hint" style={{ 
+                fontSize: '14px',
+                color: '#64748b'
+              }}>
                 Only .xml files from Nmap scans are supported (max 10MB)
               </p>
             </Upload.Dragger>
           </Form.Item>
         </Form>
       </Modal>
-    </div>
-  );
-};
-
-export default Dashboard;
-
-    fetchData();
-    const interval = setInterval(fetchData, 30000); // Refresh every 30 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div>
-      {error && (
-        <Alert
-          message="System Alert"
-          description={error}
-          type="error"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
-      )}
-
-      {/* Threat Intelligence Overview */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <SafetyOutlined />
-            </div>
-            <div className="stat-value">{stats.total_incidents}</div>
-            <div className="stat-label">Total Threats</div>
-          </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <AlertOutlined />
-            </div>
-            <div className="stat-value">{stats.open_incidents}</div>
-            <div className="stat-label">Active Incidents</div>
-          </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <BugOutlined />
-            </div>
-            <div className="stat-value">{stats.critical_incidents}</div>
-            <div className="stat-label">Critical Alerts</div>
-          </div>
-        </Col>
-        <Col span={6}>
-          <div className="stat-card">
-            <div className="stat-icon">
-              <ThunderboltOutlined />
-            </div>
-            <div className="stat-value">{stats.packets_last_hour}</div>
-            <div className="stat-label">Packets/Hour</div>
-          </div>
-        </Col>
-      </Row>
-
-      <Row gutter={16}>
-        {/* Threat Intelligence Chart */}
-        <Col span={16}>
-          <Card title="Threat Activity Timeline" loading={loading}>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={stats.incident_trends}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(52, 65, 85, 0.3)" />
-                <XAxis dataKey="date" stroke="#cbd5e1" />
-                <YAxis stroke="#cbd5e1" />
-                <Tooltip 
-                  contentStyle={{ 
-                    background: 'rgba(30, 41, 59, 0.9)', 
-                    border: '1px solid #334155',
-                    borderRadius: '8px',
-                    color: '#f8fafc'
-                  }} 
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  stroke="#00d4ff" 
-                  strokeWidth={3}
-                  dot={{ fill: '#00d4ff', strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: '#00ff88', strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </Card>
-        </Col>
-
-        {/* Network Intelligence */}
-        <Col span={8}>
-          <Card title="Source Intelligence" loading={loading}>
-            <Table
-              dataSource={stats.top_source_ips}
-              columns={[
-                {
-                  title: 'IP Address',
-                  dataIndex: 'ip',
-                  key: 'ip',
-                  render: (ip) => <code style={{ color: '#00d4ff' }}>{ip}</code>
-                },
-                {
-                  title: 'Packets',
-                  dataIndex: 'count',
-                  key: 'count',
-                  render: (count) => (
-                    <Badge 
-                      count={count} 
-                      style={{ backgroundColor: '#00d4ff' }}
-                    />
-                  )
-                }
-              ]}
-              pagination={false}
-              size="small"
-              rowKey="ip"
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Network Assets */}
-      <Row gutter={16} style={{ marginTop: 24 }}>
-        <Col span={24}>
-          <Card 
-            title={
-              <span>
-                <EyeOutlined style={{ marginRight: 8, color: '#00d4ff' }} />
-                Network Asset Discovery
-                <Badge 
-                  count={networkDevices.length} 
-                  style={{ backgroundColor: '#00ff88', marginLeft: 12 }}
-                />
-              </span>
-            }
-          >
-            {networkDevices.length > 0 ? (
-              <Table
-                columns={[
-                  {
-                    title: 'Asset IP',
-                    dataIndex: 'ip_address',
-                    key: 'ip_address',
-                    render: (ip) => <code style={{ color: '#00d4ff', fontWeight: 'bold' }}>{ip}</code>
-                  },
-                  {
-                    title: 'Identity',
-                    dataIndex: 'hostname',
-                    key: 'hostname',
-                    render: (hostname) => (
-                      <span style={{ color: '#f8fafc' }}>
-                        {hostname || 'Unknown Host'}
-                      </span>
-                    )
-                  },
-                  {
-                    title: 'Classification',
-                    dataIndex: 'device_type',
-                    key: 'device_type',
-                    render: (type) => {
-                      const getTypeColor = (deviceType) => {
-                        if (deviceType?.includes('Server')) return '#ff4757';
-                        if (deviceType?.includes('Router')) return '#00ff88';
-                        if (deviceType?.includes('Computer')) return '#00d4ff';
-                        if (deviceType?.includes('Mobile')) return '#ffa726';
-                        return '#64748b';
-                      };
-                      
-                      return (
-                        <span style={{ 
-                          padding: '4px 8px', 
-                          background: `${getTypeColor(type)}20`,
-                          border: `1px solid ${getTypeColor(type)}`,
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          color: getTypeColor(type),
-                          fontWeight: '500'
-                        }}>
-                          {type || 'Unknown'}
-                        </span>
-                      );
-                    }
-                  },
-                  {
-                    title: 'Hardware ID',
-                    dataIndex: 'mac_address',
-                    key: 'mac_address',
-                    render: (mac) => mac ? (
-                      <code style={{ fontSize: '11px', color: '#cbd5e1' }}>{mac}</code>
-                    ) : (
-                      <span style={{ color: '#64748b' }}>N/A</span>
-                    )
-                  },
-                  {
-                    title: 'Status',
-                    dataIndex: 'is_online',
-                    key: 'status',
-                    render: (isOnline) => (
-                      <Badge 
-                        status={isOnline ? 'success' : 'error'} 
-                        text={
-                          <span style={{ color: isOnline ? '#00ff88' : '#ff4757', fontWeight: '600' }}>
-                            {isOnline ? 'ONLINE' : 'OFFLINE'}
-                          </span>
-                        }
-                      />
-                    )
-                  },
-                  {
-                    title: 'Last Contact',
-                    dataIndex: 'last_seen',
-                    key: 'last_seen',
-                    render: (lastSeen) => {
-                      const date = new Date(lastSeen);
-                      const now = new Date();
-                      const diffMinutes = Math.floor((now - date) / (1000 * 60));
-                      
-                      let timeText = '';
-                      if (diffMinutes < 1) timeText = 'Just now';
-                      else if (diffMinutes < 60) timeText = `${diffMinutes}m ago`;
-                      else if (diffMinutes < 1440) timeText = `${Math.floor(diffMinutes / 60)}h ago`;
-                      else timeText = `${Math.floor(diffMinutes / 1440)}d ago`;
-                      
-                      return (
-                        <span style={{ fontSize: '12px', color: '#cbd5e1' }}>
-                          {timeText}
-                        </span>
-                      );
-                    }
-                  }
-                ]}
-                dataSource={networkDevices.slice(0, 10)} // Show first 10 devices
-                pagination={false}
-                size="small"
-                rowKey="id"
-                scroll={{ x: true }}
-              />
-            ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
-                <EyeOutlined style={{ fontSize: '48px', marginBottom: '16px', color: '#334155' }} />
-                <p>Network scanning in progress...</p>
-                <p style={{ fontSize: '12px' }}>Asset discovery runs every 5 minutes</p>
-              </div>
-            )}
-          </Card>
-        </Col>
-      </Row>
-
-      {/* System Health */}
-      <Row gutter={16} style={{ marginTop: 24 }}>
-        <Col span={24}>
-          <Card title="System Health Matrix">
-            <Row gutter={16}>
-              <Col span={6}>
-                <div className="stat-card">
-                  <div className="stat-icon">
-                    <GlobalOutlined />
-                  </div>
-                  <div className="stat-value" style={{ color: '#00ff88' }}>ONLINE</div>
-                  <div className="stat-label">Traffic Analyzer</div>
-                </div>
-              </Col>
-              <Col span={6}>
-                <div className="stat-card">
-                  <div className="stat-icon">
-                    <SecurityScanOutlined />
-                  </div>
-                  <div className="stat-value" style={{ color: '#00ff88' }}>ACTIVE</div>
-                  <div className="stat-label">Threat Engine</div>
-                </div>
-              </Col>
-              <Col span={6}>
-                <div className="stat-card">
-                  <div className="stat-icon">
-                    <AlertOutlined />
-                  </div>
-                  <div className="stat-value" style={{ color: '#00ff88' }}>READY</div>
-                  <div className="stat-label">Alert System</div>
-                </div>
-              </Col>
-              <Col span={6}>
-                <div className="stat-card">
-                  <div className="stat-icon">
-                    <ThunderboltOutlined />
-                  </div>
-                  <div className="stat-value" style={{ color: '#00ff88' }}>OPTIMAL</div>
-                  <div className="stat-label">Performance</div>
-                </div>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-      </Row>
     </div>
   );
 };

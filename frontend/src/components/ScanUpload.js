@@ -145,37 +145,83 @@ const ScanUpload = () => {
       title: 'Session ID',
       dataIndex: 'session_id',
       key: 'session_id',
-      render: (text) => <code style={{ fontSize: '12px' }}>{text}</code>
+      render: (text) => (
+        <code style={{ 
+          fontSize: '12px',
+          background: '#f8fafc',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          color: '#1e293b'
+        }}>
+          {text}
+        </code>
+      )
     },
     {
       title: 'Filename',
       dataIndex: 'filename',
       key: 'filename',
-      render: (text) => <><FileTextOutlined /> {text}</>
+      render: (text) => (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FileTextOutlined style={{ color: '#0ea5e9' }} /> 
+          <span style={{ fontWeight: '500' }}>{text}</span>
+        </span>
+      )
     },
     {
       title: 'Hosts',
       dataIndex: 'total_hosts',
       key: 'total_hosts',
-      render: (count) => <Badge count={count} style={{ backgroundColor: '#1890ff' }} />
+      render: (count) => (
+        <Badge 
+          count={count} 
+          style={{ 
+            backgroundColor: '#0ea5e9',
+            fontWeight: '600',
+            fontSize: '13px'
+          }} 
+        />
+      )
     },
     {
       title: 'Open Ports',
       dataIndex: 'total_open_ports',
       key: 'total_open_ports',
-      render: (count) => <Badge count={count} style={{ backgroundColor: '#52c41a' }} />
+      render: (count) => (
+        <Badge 
+          count={count} 
+          style={{ 
+            backgroundColor: '#10b981',
+            fontWeight: '600',
+            fontSize: '13px'
+          }} 
+        />
+      )
     },
     {
       title: 'High Risk',
       dataIndex: 'high_risk_ports',
       key: 'high_risk_ports',
-      render: (count) => <Badge count={count} style={{ backgroundColor: count > 0 ? '#ff4d4f' : '#52c41a' }} />
+      render: (count) => (
+        <Badge 
+          count={count} 
+          style={{ 
+            backgroundColor: count > 0 ? '#ef4444' : '#10b981',
+            fontWeight: '600',
+            fontSize: '13px'
+          }} 
+        />
+      )
     },
     {
       title: 'Created',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (date) => new Date(date).toLocaleString()
+      render: (date) => (
+        <span style={{ color: '#64748b', fontSize: '13px' }}>
+          {new Date(date).toLocaleString()}
+        </span>
+      )
     },
     {
       title: 'Actions',
@@ -187,6 +233,10 @@ const ScanUpload = () => {
           onClick={() => {
             setSelectedSession(record);
             fetchSessionHosts(record.session_id);
+          }}
+          style={{
+            fontWeight: '500',
+            color: '#0ea5e9'
           }}
         >
           View Details
@@ -200,19 +250,38 @@ const ScanUpload = () => {
       title: 'IP Address',
       dataIndex: 'ip_address',
       key: 'ip_address',
-      render: (ip) => <code>{ip}</code>
+      render: (ip) => (
+        <code style={{ 
+          background: '#f8fafc',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          color: '#1e293b',
+          fontWeight: '600',
+          fontSize: '13px'
+        }}>
+          {ip}
+        </code>
+      )
     },
     {
       title: 'Hostname',
       dataIndex: 'hostname',
       key: 'hostname',
-      render: (hostname) => hostname || <span style={{ color: '#ccc' }}>Unknown</span>
+      render: (hostname) => hostname ? (
+        <span style={{ fontWeight: '500', color: '#1e293b' }}>{hostname}</span>
+      ) : (
+        <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Unknown</span>
+      )
     },
     {
       title: 'OS',
       dataIndex: 'os_name',
       key: 'os_name',
-      render: (os) => os || <span style={{ color: '#ccc' }}>Unknown</span>
+      render: (os) => os ? (
+        <span style={{ color: '#64748b' }}>{os}</span>
+      ) : (
+        <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Unknown</span>
+      )
     },
     {
       title: 'Risk Level',
@@ -220,15 +289,19 @@ const ScanUpload = () => {
       key: 'risk_level',
       render: (level, record) => {
         const colors = {
-          'CRITICAL': '#ff4d4f',
-          'HIGH': '#ff7a45',
-          'MEDIUM': '#ffa940',
-          'LOW': '#52c41a'
+          'CRITICAL': '#ef4444',
+          'HIGH': '#f59e0b',
+          'MEDIUM': '#fbbf24',
+          'LOW': '#10b981'
         };
         return (
           <Badge 
             color={colors[level]} 
-            text={`${level} (${record.risk_score}/10)`} 
+            text={
+              <span style={{ fontWeight: '600' }}>
+                {level} ({record.risk_score}/10)
+              </span>
+            }
           />
         );
       }
@@ -238,10 +311,15 @@ const ScanUpload = () => {
       dataIndex: 'port_count',
       key: 'port_count',
       render: (count, record) => (
-        <span>
-          {count} total 
+        <span style={{ fontSize: '14px' }}>
+          <span style={{ fontWeight: '600', color: '#1e293b' }}>{count}</span>
+          <span style={{ color: '#64748b' }}> total</span>
           {record.high_risk_port_count > 0 && (
-            <span style={{ color: '#ff4d4f', marginLeft: '8px' }}>
+            <span style={{ 
+              color: '#ef4444', 
+              marginLeft: '8px',
+              fontWeight: '600'
+            }}>
               ({record.high_risk_port_count} high-risk)
             </span>
           )}
@@ -300,14 +378,26 @@ const ScanUpload = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <Row justify="space-between" align="middle" style={{ marginBottom: '20px' }}>
+    <div style={{ padding: '24px', maxWidth: '1600px', margin: '0 auto' }}>
+      <Row justify="space-between" align="middle" style={{ marginBottom: '32px' }}>
         <Col>
-          <h1 style={{ margin: 0, color: '#1e293b' }}>
-            <SecurityScanOutlined style={{ marginRight: '10px', color: '#00d4ff' }} />
+          <h1 style={{ 
+            margin: 0, 
+            color: '#1e293b', 
+            fontSize: '32px', 
+            fontWeight: '700',
+            letterSpacing: '-0.5px',
+            lineHeight: '1.2'
+          }}>
+            <SecurityScanOutlined style={{ marginRight: '12px', color: '#0ea5e9' }} />
             Scan Upload & Analysis
           </h1>
-          <p style={{ margin: '5px 0', color: '#64748b' }}>
+          <p style={{ 
+            margin: '8px 0 0 0', 
+            color: '#64748b',
+            fontSize: '16px',
+            lineHeight: '1.5'
+          }}>
             Upload and analyze Nmap XML scan results from authorized network scans
           </p>
         </Col>
@@ -317,6 +407,15 @@ const ScanUpload = () => {
             icon={<UploadOutlined />}
             onClick={() => setUploadModalVisible(true)}
             size="large"
+            style={{
+              height: '48px',
+              fontSize: '16px',
+              fontWeight: '600',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+              border: 'none',
+              boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
+            }}
           >
             Upload New Scan
           </Button>
@@ -328,33 +427,112 @@ const ScanUpload = () => {
         description="This platform analyzes scan results from networks you own or are authorized to test. CyberHawk performs no live scanning and operates in defensive analysis mode only."
         type="info"
         showIcon
-        style={{ marginBottom: '20px' }}
+        style={{ 
+          marginBottom: '24px',
+          borderRadius: '12px',
+          border: '1px solid #0ea5e9'
+        }}
       />
 
-      <Tabs defaultActiveKey="sessions">
-        <TabPane tab="Scan Sessions" key="sessions">
-          <Card title="Scan Session History" extra={<HistoryOutlined />}>
+      <Tabs 
+        defaultActiveKey="sessions"
+        style={{ marginBottom: '24px' }}
+        tabBarStyle={{
+          marginBottom: '24px',
+          borderBottom: '2px solid #e2e8f0'
+        }}
+      >
+        <TabPane 
+          tab={
+            <span style={{ fontSize: '15px', fontWeight: '500', padding: '8px 16px' }}>
+              <HistoryOutlined style={{ marginRight: '8px' }} />
+              Scan Sessions
+            </span>
+          } 
+          key="sessions"
+        >
+          <Card 
+            title={
+              <span style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
+                <HistoryOutlined style={{ marginRight: '8px', color: '#0ea5e9' }} />
+                Scan Session History
+              </span>
+            }
+            bordered={false}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}
+            headStyle={{
+              borderBottom: '1px solid #e2e8f0',
+              padding: '20px 24px'
+            }}
+            bodyStyle={{ padding: '0' }}
+          >
             <Table
               columns={sessionColumns}
               dataSource={scanSessions}
               rowKey="id"
-              pagination={{ pageSize: 10 }}
-              size="small"
+              pagination={{ pageSize: 10, showSizeChanger: false }}
+              size="middle"
+              style={{ borderRadius: '12px', overflow: 'hidden' }}
             />
           </Card>
         </TabPane>
 
         {selectedSession && (
-          <TabPane tab="Session Details" key="details">
-            <Card title={`Session Details: ${selectedSession.session_id}`} extra={<InfoCircleOutlined />}>
-              <Descriptions bordered column={2} style={{ marginBottom: '20px' }}>
+          <TabPane 
+            tab={
+              <span style={{ fontSize: '15px', fontWeight: '500', padding: '8px 16px' }}>
+                <InfoCircleOutlined style={{ marginRight: '8px' }} />
+                Session Details
+              </span>
+            } 
+            key="details"
+          >
+            <Card 
+              title={
+                <span style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
+                  <InfoCircleOutlined style={{ marginRight: '8px', color: '#0ea5e9' }} />
+                  Session Details: {selectedSession.session_id}
+                </span>
+              }
+              bordered={false}
+              style={{
+                borderRadius: '12px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #e2e8f0'
+              }}
+              headStyle={{
+                borderBottom: '1px solid #e2e8f0',
+                padding: '20px 24px'
+              }}
+              bodyStyle={{ padding: '24px' }}
+            >
+              <Descriptions 
+                bordered 
+                column={2} 
+                style={{ 
+                  marginBottom: '24px',
+                  borderRadius: '8px',
+                  overflow: 'hidden'
+                }}
+              >
                 <Descriptions.Item label="Filename">{selectedSession.filename}</Descriptions.Item>
                 <Descriptions.Item label="Created">{new Date(selectedSession.created_at).toLocaleString()}</Descriptions.Item>
                 <Descriptions.Item label="Total Hosts">{selectedSession.total_hosts}</Descriptions.Item>
                 <Descriptions.Item label="Open Ports">{selectedSession.total_open_ports}</Descriptions.Item>
                 <Descriptions.Item label="High Risk Ports">{selectedSession.high_risk_ports}</Descriptions.Item>
                 <Descriptions.Item label="Scan Command" span={2}>
-                  <code>{selectedSession.scan_command}</code>
+                  <code style={{ 
+                    background: '#f8fafc', 
+                    padding: '4px 8px', 
+                    borderRadius: '4px',
+                    fontSize: '13px'
+                  }}>
+                    {selectedSession.scan_command}
+                  </code>
                 </Descriptions.Item>
                 {selectedSession.notes && (
                   <Descriptions.Item label="Notes" span={2}>{selectedSession.notes}</Descriptions.Item>
@@ -370,8 +548,9 @@ const ScanUpload = () => {
                   expandedRowRender,
                   rowExpandable: (record) => record.ports && record.ports.length > 0,
                 }}
-                pagination={{ pageSize: 10 }}
-                size="small"
+                pagination={{ pageSize: 10, showSizeChanger: false }}
+                size="middle"
+                style={{ borderRadius: '8px', overflow: 'hidden' }}
               />
             </Card>
           </TabPane>
@@ -380,18 +559,27 @@ const ScanUpload = () => {
 
       {/* Upload Modal */}
       <Modal
-        title="Upload Nmap Scan Results"
+        title={
+          <span style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
+            <UploadOutlined style={{ marginRight: '8px', color: '#0ea5e9' }} />
+            Upload Nmap Scan Results
+          </span>
+        }
         visible={uploadModalVisible}
         onCancel={() => setUploadModalVisible(false)}
         footer={null}
         width={600}
+        bodyStyle={{ padding: '24px' }}
       >
         <Alert
           message="Security Notice"
           description="Only upload scan results from networks you own or are authorized to test. Ensure compliance with all applicable laws and regulations."
           type="warning"
           showIcon
-          style={{ marginBottom: '20px' }}
+          style={{ 
+            marginBottom: '24px',
+            borderRadius: '8px'
+          }}
         />
         
         <Form layout="vertical">
@@ -426,17 +614,47 @@ const ScanUpload = () => {
           message="Supported Nmap Commands"
           description={
             <div>
-              <p>Examples of Nmap commands that generate compatible XML output:</p>
-              <ul style={{ marginBottom: 0 }}>
-                <li><code>nmap -sS -sV -O -oX scan.xml 192.168.1.0/24</code></li>
-                <li><code>nmap -sT -sV -p- -oX scan.xml target.com</code></li>
-                <li><code>nmap -sU -sV --top-ports 1000 -oX scan.xml 10.0.0.0/8</code></li>
+              <p style={{ marginBottom: '12px', lineHeight: '1.5' }}>Examples of Nmap commands that generate compatible XML output:</p>
+              <ul style={{ marginBottom: 0, lineHeight: '1.8' }}>
+                <li>
+                  <code style={{ 
+                    background: '#f8fafc', 
+                    padding: '2px 6px', 
+                    borderRadius: '4px',
+                    fontSize: '12px'
+                  }}>
+                    nmap -sS -sV -O -oX scan.xml 192.168.1.0/24
+                  </code>
+                </li>
+                <li>
+                  <code style={{ 
+                    background: '#f8fafc', 
+                    padding: '2px 6px', 
+                    borderRadius: '4px',
+                    fontSize: '12px'
+                  }}>
+                    nmap -sT -sV -p- -oX scan.xml target.com
+                  </code>
+                </li>
+                <li>
+                  <code style={{ 
+                    background: '#f8fafc', 
+                    padding: '2px 6px', 
+                    borderRadius: '4px',
+                    fontSize: '12px'
+                  }}>
+                    nmap -sU -sV --top-ports 1000 -oX scan.xml 10.0.0.0/8
+                  </code>
+                </li>
               </ul>
             </div>
           }
           type="info"
           showIcon
-          style={{ marginTop: '20px' }}
+          style={{ 
+            marginTop: '24px',
+            borderRadius: '8px'
+          }}
         />
       </Modal>
     </div>

@@ -1,7 +1,7 @@
 {
-  "name": "securenet-monitor-demo",
-  "version": "1.0.0",
-  "description": "SecureNet Monitor - Network Security Dashboard Demo",
+  "name": "cyberhawk-security",
+  "version": "2.0.0",
+  "description": "CyberHawk - Defensive Security Analysis Platform",
   "scripts": {
     "build": "cd frontend && npm install && npm run build",
     "start": "cd frontend && npm start",
