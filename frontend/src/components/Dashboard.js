@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Table, Alert, Badge } from 'antd';
+import { Card, Row, Col, Table, Alert, Badge, Button, Upload, Modal, Form, Input, message, Tabs } from 'antd';
 import { 
   AlertOutlined, 
   GlobalOutlined, 
@@ -7,97 +7,449 @@ import {
   SafetyOutlined,
   EyeOutlined,
   BugOutlined,
-  ThunderboltOutlined
+  ThunderboltOutlined,
+  UploadOutlined,
+  FileTextOutlined,
+  HistoryOutlined
 } from '@ant-design/icons';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import mockApi from '../services/mockApi';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import axios from 'axios';
+
+const { TabPane } = Tabs;
+const { TextArea } = Input;
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
+    total_sessions: 0,
+    total_hosts: 0,
     total_incidents: 0,
-    open_incidents: 0,
     critical_incidents: 0,
-    packets_last_hour: 0,
-    top_source_ips: [],
-    incident_trends: []
+    high_risk_hosts: 0,
+    recent_sessions: []
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [networkDevices, setNetworkDevices] = useState([]);
+  const [uploadModalVisible, setUploadModalVisible] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [scanSessions, setScanSessions] = useState([]);
+  const [incidents, setIncidents] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [statsResponse, devicesResponse] = await Promise.all([
-          mockApi.getDashboardStats(),
-          fetch('http://localhost:8001/api/network/devices', {
-            headers: { 'Authorization': 'Bearer demo-token' }
-          }).then(res => res.json()).catch(() => ({ 
-            devices: [
-              {
-                id: 1,
-                ip_address: '192.168.1.1',
-                hostname: 'router.local',
-                device_type: 'Router/Gateway',
-                vendor: 'Netgear Inc.',
-                is_online: true,
-                mac_address: '00:1B:44:11:3A:B7',
-                last_seen: new Date().toISOString()
-              },
-              {
-                id: 2,
-                ip_address: '192.168.1.100',
-                hostname: 'workstation-01',
-                device_type: 'Windows Computer',
-                vendor: 'Dell Inc.',
-                is_online: true,
-                mac_address: '00:50:56:C0:00:08',
-                last_seen: new Date().toISOString()
-              },
-              {
-                id: 3,
-                ip_address: '192.168.1.150',
-                hostname: 'iPhone-Alex',
-                device_type: 'Mobile Device',
-                vendor: 'Apple Inc.',
-                is_online: true,
-                mac_address: '8C:85:90:12:34:56',
-                last_seen: new Date().toISOString()
-              },
-              {
-                id: 4,
-                ip_address: '192.168.1.200',
-                hostname: 'server-01',
-                device_type: 'Linux Server',
-                vendor: 'HP Enterprise',
-                is_online: true,
-                mac_address: '00:15:5D:FF:FF:FF',
-                last_seen: new Date().toISOString()
-              },
-              {
-                id: 5,
-                ip_address: '192.168.1.75',
-                hostname: 'smart-tv',
-                device_type: 'IoT Device',
-                vendor: 'Samsung Electronics',
-                is_online: false,
-                mac_address: '00:26:37:12:34:56',
-                last_seen: new Date(Date.now() - 3600000).toISOString()
-              }
-            ]
-          }))
-        ]);
+    fetchData();
+    const interval = setInterval(fetchData, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [statsResponse, sessionsResponse, incidentsResponse] = await Promise.all([
+        axios.get('http://localhost:8001/api/dashboard/stats', {
+          headers: { 'Authorization': 'Bearer demo-token' }
+        }).catch(() => ({ data: getMockStats() })),
         
-        setStats(statsResponse);
-        setNetworkDevices(devicesResponse.devices || []);
-        setError(null);
-      } catch (err) {
-        setError('Failed to fetch dashboard statistics');
-        console.error('Dashboard stats error:', err);
-      } finally {
-        setLoading(false);
+        axios.get('http://localhost:8001/api/scan/sessions', {
+          headers: { 'Authorization': 'Bearer demo-token' }
+        }).catch(() => ({ data: { sessions: getMockSessions() } })),
+        
+        axios.get('http://localhost:8001/api/incidents', {
+          headers: { 'Authorization': 'Bearer demo-token' }
+        }).catch(() => ({ data: { incidents: getMockIncidents() } }))
+      ]);
+      
+      setStats(statsResponse.data);
+      setScanSessions(sessionsResponse.data.sessions || []);
+      setIncidents(incidentsResponse.data.incidents || []);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch dashboard data');
+      console.error('Dashboard error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getMockStats = () => ({
+    total_sessions: 3,
+    total_hosts: 15,
+    total_incidents: 5,
+    critical_incidents: 1,
+    high_risk_hosts: 4,
+    recent_sessions: [
+      {
+        session_id: 'demo-session-001',
+        filename: 'network_scan_demo.xml',
+        created_at: new Date().toISOString(),
+        total_hosts: 5,
+        high_risk_ports: 8
       }
-    };
+    ]
+  });
+
+  const getMockSessions = () => [
+    {
+      id: 1,
+      session_id: 'demo-session-001',
+      created_at: new Date().toISOString(),
+      filename: 'network_scan_demo.xml',
+      total_hosts: 5,
+      total_open_ports: 23,
+      high_risk_ports: 8,
+      scan_command: 'nmap -sS -sV -O 192.168.1.0/24',
+      notes: 'Demo scan session for portfolio showcase'
+    }
+  ];
+
+  const getMockIncidents = () => [
+    {
+      id: 1,
+      created_at: new Date().toISOString(),
+      severity: 'CRITICAL',
+      incident_type: 'Insecure Service',
+      source_ip: '192.168.1.75',
+      description: 'IoT camera with Telnet service enabled',
+      status: 'OPEN',
+      session_id: 'demo-session-001'
+    },
+    {
+      id: 2,
+      created_at: new Date().toISOString(),
+      severity: 'HIGH',
+      incident_type: 'Exposed Database',
+      source_ip: '192.168.1.150',
+      description: 'MySQL database service accessible from network',
+      status: 'OPEN',
+      session_id: 'demo-session-001'
+    }
+  ];
+
+  const handleUpload = async (options) => {
+    const { file, onSuccess, onError } = options;
+    
+    if (!file.name.endsWith('.xml')) {
+      message.error('Please upload only Nmap XML files');
+      onError(new Error('Invalid file type'));
+      return;
+    }
+
+    setUploading(true);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('notes', document.getElementById('upload-notes')?.value || '');
+
+    try {
+      const response = await axios.post('http://localhost:8001/api/scan/upload', formData, {
+        headers: {
+          'Authorization': 'Bearer demo-token',
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      message.success(`Scan uploaded successfully! Session: ${response.data.session_id}`);
+      onSuccess(response.data);
+      setUploadModalVisible(false);
+      fetchData(); // Refresh data
+      
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Upload failed';
+      message.error(errorMsg);
+      onError(error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const riskDistributionData = [
+    { name: 'Low Risk', value: stats.total_hosts - stats.high_risk_hosts, color: '#52c41a' },
+    { name: 'High Risk', value: stats.high_risk_hosts, color: '#ff4d4f' }
+  ];
+
+  const sessionColumns = [
+    {
+      title: 'Session ID',
+      dataIndex: 'session_id',
+      key: 'session_id',
+      render: (text) => <code>{text}</code>
+    },
+    {
+      title: 'Filename',
+      dataIndex: 'filename',
+      key: 'filename',
+      render: (text) => <><FileTextOutlined /> {text}</>
+    },
+    {
+      title: 'Hosts',
+      dataIndex: 'total_hosts',
+      key: 'total_hosts',
+      render: (count) => <Badge count={count} style={{ backgroundColor: '#1890ff' }} />
+    },
+    {
+      title: 'High Risk Ports',
+      dataIndex: 'high_risk_ports',
+      key: 'high_risk_ports',
+      render: (count) => <Badge count={count} style={{ backgroundColor: count > 0 ? '#ff4d4f' : '#52c41a' }} />
+    },
+    {
+      title: 'Created',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (date) => new Date(date).toLocaleString()
+    }
+  ];
+
+  const incidentColumns = [
+    {
+      title: 'Severity',
+      dataIndex: 'severity',
+      key: 'severity',
+      render: (severity) => {
+        const colors = {
+          'CRITICAL': '#ff4d4f',
+          'HIGH': '#ff7a45',
+          'MEDIUM': '#ffa940',
+          'LOW': '#52c41a'
+        };
+        return <Badge color={colors[severity]} text={severity} />;
+      }
+    },
+    {
+      title: 'Type',
+      dataIndex: 'incident_type',
+      key: 'incident_type'
+    },
+    {
+      title: 'Source IP',
+      dataIndex: 'source_ip',
+      key: 'source_ip',
+      render: (ip) => <code>{ip}</code>
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description'
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => {
+        const colors = {
+          'OPEN': 'red',
+          'ACKNOWLEDGED': 'orange',
+          'RESOLVED': 'green'
+        };
+        return <Badge color={colors[status]} text={status} />;
+      }
+    }
+  ];
+
+  if (loading) {
+    return <div style={{ padding: '20px', textAlign: 'center' }}>Loading dashboard...</div>;
+  }
+
+  return (
+    <div style={{ padding: '20px' }}>
+      {/* Header with Upload Button */}
+      <Row justify="space-between" align="middle" style={{ marginBottom: '20px' }}>
+        <Col>
+          <h1 style={{ margin: 0, color: '#1e293b' }}>
+            <SafetyOutlined style={{ marginRight: '10px', color: '#00d4ff' }} />
+            CyberHawk Defensive Security Analysis
+          </h1>
+          <p style={{ margin: '5px 0', color: '#64748b' }}>
+            Network Security Analysis Platform - Simulated Dataset Mode
+          </p>
+        </Col>
+        <Col>
+          <Button 
+            type="primary" 
+            icon={<UploadOutlined />}
+            onClick={() => setUploadModalVisible(true)}
+            size="large"
+          >
+            Upload Nmap Scan
+          </Button>
+        </Col>
+      </Row>
+
+      {error && (
+        <Alert
+          message="Connection Error"
+          description={error + " - Using simulated data for demo"}
+          type="warning"
+          showIcon
+          style={{ marginBottom: '20px' }}
+        />
+      )}
+
+      {/* Statistics Cards */}
+      <Row gutter={[16, 16]} style={{ marginBottom: '20px' }}>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <HistoryOutlined style={{ fontSize: '24px', color: '#1890ff', marginRight: '12px' }} />
+              <div>
+                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.total_sessions}</div>
+                <div style={{ color: '#8c8c8c' }}>Scan Sessions</div>
+              </div>
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <GlobalOutlined style={{ fontSize: '24px', color: '#52c41a', marginRight: '12px' }} />
+              <div>
+                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.total_hosts}</div>
+                <div style={{ color: '#8c8c8c' }}>Discovered Hosts</div>
+              </div>
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <AlertOutlined style={{ fontSize: '24px', color: '#ff4d4f', marginRight: '12px' }} />
+              <div>
+                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.high_risk_hosts}</div>
+                <div style={{ color: '#8c8c8c' }}>High Risk Hosts</div>
+              </div>
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <BugOutlined style={{ fontSize: '24px', color: '#fa8c16', marginRight: '12px' }} />
+              <div>
+                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.total_incidents}</div>
+                <div style={{ color: '#8c8c8c' }}>Security Incidents</div>
+              </div>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Risk Distribution Chart */}
+      <Row gutter={[16, 16]} style={{ marginBottom: '20px' }}>
+        <Col xs={24} lg={12}>
+          <Card title="Host Risk Distribution" extra={<SecurityScanOutlined />}>
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={riskDistributionData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  dataKey="value"
+                  label={({ name, value }) => `${name}: ${value}`}
+                >
+                  {riskDistributionData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Recent Activity" extra={<EyeOutlined />}>
+            <div style={{ height: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              {stats.recent_sessions.length > 0 ? (
+                stats.recent_sessions.map((session, index) => (
+                  <div key={index} style={{ marginBottom: '10px', padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
+                    <div style={{ fontWeight: 'bold' }}>{session.filename}</div>
+                    <div style={{ fontSize: '12px', color: '#666' }}>
+                      {session.total_hosts} hosts, {session.high_risk_ports} high-risk ports
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ textAlign: 'center', color: '#8c8c8c' }}>
+                  No recent scan sessions
+                </div>
+              )}
+            </div>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Data Tables */}
+      <Tabs defaultActiveKey="sessions">
+        <TabPane tab="Scan Sessions" key="sessions">
+          <Card title="Scan Session History" extra={<HistoryOutlined />}>
+            <Table
+              columns={sessionColumns}
+              dataSource={scanSessions}
+              rowKey="id"
+              pagination={{ pageSize: 10 }}
+              size="small"
+            />
+          </Card>
+        </TabPane>
+        <TabPane tab="Security Incidents" key="incidents">
+          <Card title="Security Incidents" extra={<AlertOutlined />}>
+            <Table
+              columns={incidentColumns}
+              dataSource={incidents}
+              rowKey="id"
+              pagination={{ pageSize: 10 }}
+              size="small"
+            />
+          </Card>
+        </TabPane>
+      </Tabs>
+
+      {/* Upload Modal */}
+      <Modal
+        title="Upload Nmap Scan Results"
+        visible={uploadModalVisible}
+        onCancel={() => setUploadModalVisible(false)}
+        footer={null}
+        width={600}
+      >
+        <Alert
+          message="Authorized Scanning Only"
+          description="Only upload scan results from networks you own or are authorized to test. CyberHawk performs no live scanning."
+          type="info"
+          showIcon
+          style={{ marginBottom: '20px' }}
+        />
+        
+        <Form layout="vertical">
+          <Form.Item label="Scan Notes (Optional)">
+            <TextArea
+              id="upload-notes"
+              placeholder="Add notes about this scan session..."
+              rows={3}
+            />
+          </Form.Item>
+          
+          <Form.Item label="Nmap XML File">
+            <Upload.Dragger
+              name="file"
+              customRequest={handleUpload}
+              accept=".xml"
+              maxCount={1}
+              loading={uploading}
+            >
+              <p className="ant-upload-drag-icon">
+                <FileTextOutlined />
+              </p>
+              <p className="ant-upload-text">Click or drag Nmap XML file to upload</p>
+              <p className="ant-upload-hint">
+                Only .xml files from Nmap scans are supported (max 10MB)
+              </p>
+            </Upload.Dragger>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+};
+
+export default Dashboard;
 
     fetchData();
     const interval = setInterval(fetchData, 30000); // Refresh every 30 seconds

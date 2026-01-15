@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """
-SecureNet API Gateway
-REST API for security dashboard and external integrations
+CyberHawk Defensive Security Analysis API Gateway
+REST API for scan result ingestion and security analysis
 """
 
+import hashlib
 import json
 import os
+import uuid
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 import asyncpg
-import redis
 import structlog
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -34,17 +36,20 @@ logger = structlog.get_logger()
 
 # FastAPI app
 app = FastAPI(
-    title="SecureNet API",
-    description="Network Security Monitoring API",
-    version="1.0.0"
+    title="CyberHawk Defensive Security Analysis API",
+    description="Network Security Analysis and Scan Result Ingestion API",
+    version="2.0.0"
 )
 
-# CORS middleware
+# CORS middleware - restrict to deployed frontend domain in production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://updated-network-security-pj-rtms.vercel.app"
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 
@@ -53,61 +58,51 @@ security = HTTPBearer()
 
 # Global connections
 db_pool = None
-redis_client = None
 
 # Pydantic models
-class SecurityIncident(BaseModel):
-    id: int
-    created_at: datetime
-    severity: str
-    incident_type: str
-    source_ip: Optional[str]
-    description: str
-    status: str
-    assigned_to: Optional[str]
-    resolved_at: Optional[datetime]
-
-class NetworkTraffic(BaseModel):
-    id: int
-    timestamp: datetime
-    source_ip: str
-    dest_ip: str
-    source_port: Optional[int]
-    dest_port: Optional[int]
-    protocol: str
-    packet_size: int
-
-class Alert(BaseModel):
-    id: int
-    incident_id: int
-    alert_type: str
-    message: str
-    created_at: datetime
-    acknowledged: bool
-
 class DashboardStats(BaseModel):
+    total_sessions: int
+    total_hosts: int
     total_incidents: int
-    open_incidents: int
     critical_incidents: int
-    packets_last_hour: int
-    top_source_ips: List[dict]
-    incident_trends: List[dict]
+    high_risk_hosts: int
+    recent_sessions: List[dict]
+
+# Rate limiting (simple in-memory implementation)
+upload_attempts = {}
+MAX_UPLOADS_PER_HOUR = 10
+
+def check_rate_limit(client_ip: str) -> bool:
+    """Simple rate limiting for file uploads"""
+    now = datetime.now()
+    hour_ago = now - timedelta(hours=1)
+    
+    if client_ip not in upload_attempts:
+        upload_attempts[client_ip] = []
+    
+    # Clean old attempts
+    upload_attempts[client_ip] = [
+        attempt for attempt in upload_attempts[client_ip] 
+        if attempt > hour_ago
+    ]
+    
+    if len(upload_attempts[client_ip]) >= MAX_UPLOADS_PER_HOUR:
+        return False
+    
+    upload_attempts[client_ip].append(now)
+    return True
 
 # Startup/shutdown events
 @app.on_event("startup")
 async def startup():
-    global db_pool, redis_client
+    global db_pool
     
     try:
         # Database connection
-        db_url = os.getenv('DATABASE_URL')
+        db_url = os.getenv('DATABASE_URL', 'postgresql://cyberhawk:secure123@localhost:5433/cyberhawk_db')
         db_pool = await asyncpg.create_pool(db_url, min_size=2, max_size=20)
         
-        # Redis connection
-        redis_url = os.getenv('REDIS_URL')
-        redis_client = redis.from_url(redis_url, decode_responses=True)
-        
-        logger.info("API Gateway started successfully")
+        logger.info("CyberHawk API Gateway started successfully")
         
     except Exception as e:
         logger.error("Failed to start API Gateway", error=str(e))
@@ -122,12 +117,133 @@ async def shutdown():
 # Authentication (simplified for demo)
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     # In production, validate JWT token here
-    return {"username": "admin", "role": "security_analyst"}
+    return {"username": "security_analyst", "role": "analyst"}
+
+# Utility functions
+def calculate_host_risk_score(ports: List[Dict]) -> tuple[int, str]:
+    """Calculate risk score for a host based on open ports"""
+    total_score = 0
+    high_risk_ports = 0
+    
+    # High-risk port mappings
+    high_risk_port_scores = {
+        22: 7, 23: 9, 21: 6, 445: 8, 3389: 8, 135: 6, 
+        161: 7, 1433: 7, 3306: 6, 5432: 6
+    }
+    
+    for port in ports:
+        port_num = port.get('port_number', 0)
+        if port_num in high_risk_port_scores:
+            score = high_risk_port_scores[port_num]
+            total_score += score
+            if score >= 7:
+                high_risk_ports += 1
+        else:
+            total_score += 2  # Base score for any open port
+    
+    # Normalize score (0-10 scale)
+    normalized_score = min(10, total_score // max(1, len(ports)))
+    
+    if normalized_score >= 8:
+        risk_level = "CRITICAL"
+    elif normalized_score >= 6:
+        risk_level = "HIGH"
+    elif normalized_score >= 4:
+        risk_level = "MEDIUM"
+    else:
+        risk_level = "LOW"
+    
+    return normalized_score, risk_level
+
+def parse_nmap_xml(xml_content: str) -> Dict[str, Any]:
+    """Parse Nmap XML scan results with security hardening"""
+    try:
+        # Disable external entity processing to prevent XXE attacks
+        parser = ET.XMLParser()
+        parser.entity = {}  # Disable entity processing
+        
+        root = ET.fromstring(xml_content, parser)
+        
+        scan_info = {
+            'hosts': [],
+            'scan_args': root.get('args', ''),
+            'start_time': root.get('startstr', ''),
+            'version': root.get('version', '')
+        }
+        
+        for host in root.findall('.//host'):
+            # Skip hosts that are down
+            status = host.find('status')
+            if status is None or status.get('state') != 'up':
+                continue
+                
+            host_info = {
+                'ip_address': '',
+                'hostname': None,
+                'mac_address': None,
+                'vendor': None,
+                'os_name': None,
+                'os_accuracy': None,
+                'ports': []
+            }
+            
+            # Get IP address
+            address = host.find('.//address[@addrtype="ipv4"]')
+            if address is not None:
+                host_info['ip_address'] = address.get('addr')
+            
+            # Get MAC address and vendor
+            mac_address = host.find('.//address[@addrtype="mac"]')
+            if mac_address is not None:
+                host_info['mac_address'] = mac_address.get('addr')
+                host_info['vendor'] = mac_address.get('vendor')
+            
+            # Get hostname
+            hostname = host.find('.//hostname')
+            if hostname is not None:
+                host_info['hostname'] = hostname.get('name')
+            
+            # Get OS information
+            os_match = host.find('.//osmatch')
+            if os_match is not None:
+                host_info['os_name'] = os_match.get('name')
+                host_info['os_accuracy'] = int(os_match.get('accuracy', 0))
+            
+            # Get open ports
+            ports = host.find('.//ports')
+            if ports is not None:
+                for port in ports.findall('port'):
+                    state = port.find('state')
+                    if state is not None and state.get('state') == 'open':
+                        service = port.find('service')
+                        port_info = {
+                            'port_number': int(port.get('portid')),
+                            'protocol': port.get('protocol'),
+                            'port_state': state.get('state'),
+                            'service_name': service.get('name') if service is not None else None,
+                            'service_version': service.get('version') if service is not None else None,
+                            'service_product': service.get('product') if service is not None else None
+                        }
+                        host_info['ports'].append(port_info)
+            
+            if host_info['ip_address']:  # Only add hosts with valid IP
+                scan_info['hosts'].append(host_info)
+        
+        return scan_info
+        
+    except ET.ParseError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid XML format: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error parsing XML: {str(e)}")
 
 # API Endpoints
 @app.get("/")
 async def root():
-    return {"message": "SecureNet API Gateway", "version": "1.0.0"}
+    return {
+        "message": "CyberHawk Defensive Security Analysis API", 
+        "version": "2.0.0",
+        "mode": "Defensive Analysis Platform"
+    }
 
 @app.get("/health")
 async def health_check():
@@ -135,9 +251,6 @@ async def health_check():
         # Check database
         async with db_pool.acquire() as conn:
             await conn.fetchval("SELECT 1")
-        
-        # Check Redis
-        redis_client.ping()
         
         return {"status": "healthy", "timestamp": datetime.now()}
         
@@ -149,406 +262,242 @@ async def get_dashboard_stats(user=Depends(get_current_user)):
     """Get dashboard statistics"""
     try:
         async with db_pool.acquire() as conn:
-            # Total incidents
-            total_incidents = await conn.fetchval(
-                "SELECT COUNT(*) FROM security_incidents"
-            )
+            # Get session count
+            total_sessions = await conn.fetchval("SELECT COUNT(*) FROM scan_sessions")
             
-            # Open incidents
-            open_incidents = await conn.fetchval(
-                "SELECT COUNT(*) FROM security_incidents WHERE status = 'OPEN'"
-            )
+            # Get host count
+            total_hosts = await conn.fetchval("SELECT COUNT(*) FROM scan_hosts")
             
-            # Critical incidents
+            # Get incident counts
+            total_incidents = await conn.fetchval("SELECT COUNT(*) FROM security_incidents")
             critical_incidents = await conn.fetchval(
                 "SELECT COUNT(*) FROM security_incidents WHERE severity = 'CRITICAL'"
             )
             
-            # Packets last hour
-            packets_last_hour = await conn.fetchval("""
-                SELECT COUNT(*) FROM network_traffic 
-                WHERE timestamp > NOW() - INTERVAL '1 hour'
-            """)
+            # Get high risk hosts
+            high_risk_hosts = await conn.fetchval(
+                "SELECT COUNT(*) FROM scan_hosts WHERE risk_level IN ('HIGH', 'CRITICAL')"
+            )
             
-            # Top source IPs
-            top_ips = await conn.fetch("""
-                SELECT source_ip::text as source_ip, COUNT(*) as count
-                FROM network_traffic 
-                WHERE timestamp > NOW() - INTERVAL '24 hours'
-                GROUP BY source_ip 
-                ORDER BY count DESC 
+            # Get recent sessions
+            recent_sessions_rows = await conn.fetch("""
+                SELECT session_id, filename, created_at, total_hosts, high_risk_ports
+                FROM scan_sessions 
+                ORDER BY created_at DESC 
                 LIMIT 5
             """)
             
-            # Incident trends (last 7 days)
-            trends = await conn.fetch("""
-                SELECT DATE(created_at) as date, COUNT(*) as count
-                FROM security_incidents 
-                WHERE created_at > NOW() - INTERVAL '7 days'
-                GROUP BY DATE(created_at)
-                ORDER BY date
-            """)
-        
-        return DashboardStats(
-            total_incidents=total_incidents or 0,
-            open_incidents=open_incidents or 0,
-            critical_incidents=critical_incidents or 0,
-            packets_last_hour=packets_last_hour or 0,
-            top_source_ips=[{"ip": str(row["source_ip"]), "count": row["count"]} for row in top_ips],
-            incident_trends=[{"date": str(row["date"]), "count": row["count"]} for row in trends]
-        )
-        
+            recent_sessions = [
+                {
+                    "session_id": row['session_id'],
+                    "filename": row['filename'],
+                    "created_at": row['created_at'].isoformat(),
+                    "total_hosts": row['total_hosts'],
+                    "high_risk_ports": row['high_risk_ports']
+                }
+                for row in recent_sessions_rows
+            ]
+            
+            return DashboardStats(
+                total_sessions=total_sessions or 0,
+                total_hosts=total_hosts or 0,
+                total_incidents=total_incidents or 0,
+                critical_incidents=critical_incidents or 0,
+                high_risk_hosts=high_risk_hosts or 0,
+                recent_sessions=recent_sessions
+            )
+            
     except Exception as e:
         logger.error("Failed to get dashboard stats", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to retrieve dashboard stats")
+        raise HTTPException(status_code=500, detail="Failed to retrieve dashboard statistics")
 
-@app.get("/api/incidents", response_model=List[SecurityIncident])
-async def get_incidents(
-    limit: int = 50,
-    severity: Optional[str] = None,
-    status: Optional[str] = None,
+@app.post("/api/scan/upload")
+async def upload_scan_results(
+    file: UploadFile = File(...),
+    notes: str = Form(""),
     user=Depends(get_current_user)
 ):
-    """Get security incidents with optional filtering"""
+    """Upload and process Nmap XML scan results"""
+    
+    # Rate limiting
+    client_ip = "demo_client"  # In production, get real client IP
+    if not check_rate_limit(client_ip):
+        raise HTTPException(
+            status_code=429, 
+            detail="Rate limit exceeded. Maximum 10 uploads per hour."
+        )
+    
+    # Validate file
+    if not file.filename.endswith('.xml'):
+        raise HTTPException(status_code=400, detail="Only XML files are supported")
+    
+    if file.size and file.size > 10 * 1024 * 1024:  # 10MB limit
+        raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
+    
     try:
-        query = "SELECT * FROM security_incidents WHERE 1=1"
-        params = []
+        # Read and validate file content
+        content = await file.read()
+        if not content:
+            raise HTTPException(status_code=400, detail="Empty file uploaded")
         
-        if severity:
-            query += f" AND severity = ${len(params) + 1}"
-            params.append(severity)
-            
-        if status:
-            query += f" AND status = ${len(params) + 1}"
-            params.append(status)
-            
-        query += f" ORDER BY created_at DESC LIMIT ${len(params) + 1}"
-        params.append(limit)
+        xml_content = content.decode('utf-8')
+        file_hash = hashlib.sha256(content).hexdigest()
         
+        # Check for duplicate uploads
         async with db_pool.acquire() as conn:
-            rows = await conn.fetch(query, *params)
-            
-        return [SecurityIncident(**{**dict(row), 'source_ip': str(row['source_ip']) if row['source_ip'] else None}) for row in rows]
+            existing = await conn.fetchval(
+                "SELECT session_id FROM scan_sessions WHERE file_hash = $1", 
+                file_hash
+            )
+            if existing:
+                raise HTTPException(
+                    status_code=409, 
+                    detail=f"File already uploaded in session {existing}"
+                )
         
+        # Parse XML
+        scan_data = parse_nmap_xml(xml_content)
+        
+        # Generate session ID
+        session_id = f"scan-{uuid.uuid4().hex[:12]}"
+        
+        # Calculate statistics
+        total_hosts = len(scan_data['hosts'])
+        total_open_ports = sum(len(host['ports']) for host in scan_data['hosts'])
+        
+        # Store scan session
+        async with db_pool.acquire() as conn:
+            async with conn.transaction():
+                # Insert scan session
+                await conn.execute("""
+                    INSERT INTO scan_sessions 
+                    (session_id, filename, file_hash, total_hosts, total_open_ports, 
+                     scan_command, notes, scan_start_time)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                """, session_id, file.filename, file_hash, total_hosts, total_open_ports,
+                    scan_data.get('scan_args'), notes, datetime.now())
+                
+                high_risk_count = 0
+                
+                # Process each host
+                for host_data in scan_data['hosts']:
+                    # Calculate risk score
+                    risk_score, risk_level = calculate_host_risk_score(host_data['ports'])
+                    
+                    if risk_level in ['HIGH', 'CRITICAL']:
+                        high_risk_count += 1
+                    
+                    # Insert host
+                    host_id = await conn.fetchval("""
+                        INSERT INTO scan_hosts 
+                        (session_id, ip_address, hostname, mac_address, vendor, 
+                         os_name, os_accuracy, risk_score, risk_level)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                        RETURNING id
+                    """, session_id, host_data['ip_address'], host_data.get('hostname'),
+                        host_data.get('mac_address'), host_data.get('vendor'),
+                        host_data.get('os_name'), host_data.get('os_accuracy'),
+                        risk_score, risk_level)
+                    
+                    # Insert ports
+                    for port_data in host_data['ports']:
+                        # Check if port is high risk
+                        is_high_risk = port_data['port_number'] in [22, 23, 21, 445, 3389, 135, 161, 1433, 3306, 5432]
+                        
+                        await conn.execute("""
+                            INSERT INTO scan_ports 
+                            (host_id, session_id, port_number, protocol, port_state, 
+                             service_name, service_version, is_high_risk)
+                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                        """, host_id, session_id, port_data['port_number'], 
+                            port_data['protocol'], port_data['port_state'],
+                            port_data.get('service_name'), port_data.get('service_version'),
+                            is_high_risk)
+                
+                # Update high risk port count
+                await conn.execute(
+                    "UPDATE scan_sessions SET high_risk_ports = $1 WHERE session_id = $2",
+                    high_risk_count, session_id
+                )
+        
+        logger.info("Scan results uploaded successfully", 
+                   session_id=session_id, hosts=total_hosts, ports=total_open_ports)
+        
+        return {
+            "message": "Scan results uploaded successfully",
+            "session_id": session_id,
+            "total_hosts": total_hosts,
+            "total_open_ports": total_open_ports,
+            "high_risk_hosts": high_risk_count
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Failed to process scan upload", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to process scan results")
+
+@app.get("/api/scan/sessions")
+async def get_scan_sessions(user=Depends(get_current_user)):
+    """Get all scan sessions"""
+    try:
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch("""
+                SELECT * FROM scan_sessions 
+                ORDER BY created_at DESC
+            """)
+            
+            return {
+                "sessions": [
+                    {
+                        "id": row['id'],
+                        "session_id": row['session_id'],
+                        "created_at": row['created_at'].isoformat(),
+                        "filename": row['filename'],
+                        "total_hosts": row['total_hosts'],
+                        "total_open_ports": row['total_open_ports'],
+                        "high_risk_ports": row['high_risk_ports'],
+                        "scan_command": row['scan_command'],
+                        "notes": row['notes']
+                    }
+                    for row in rows
+                ]
+            }
+            
+    except Exception as e:
+        logger.error("Failed to get scan sessions", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve scan sessions")
+
+@app.get("/api/incidents")
+async def get_incidents(user=Depends(get_current_user)):
+    """Get security incidents"""
+    try:
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch("""
+                SELECT * FROM security_incidents 
+                ORDER BY created_at DESC
+            """)
+            
+            return {
+                "incidents": [
+                    {
+                        "id": row['id'],
+                        "created_at": row['created_at'].isoformat(),
+                        "severity": row['severity'],
+                        "incident_type": row['incident_type'],
+                        "source_ip": row['source_ip'],
+                        "description": row['description'],
+                        "status": row['status'],
+                        "session_id": row['session_id']
+                    }
+                    for row in rows
+                ]
+            }
+            
     except Exception as e:
         logger.error("Failed to get incidents", error=str(e))
         raise HTTPException(status_code=500, detail="Failed to retrieve incidents")
 
-@app.get("/api/traffic", response_model=List[NetworkTraffic])
-async def get_network_traffic(
-    limit: int = 100,
-    source_ip: Optional[str] = None,
-    user=Depends(get_current_user)
-):
-    """Get network traffic data"""
-    try:
-        query = "SELECT * FROM network_traffic WHERE 1=1"
-        params = []
-        
-        if source_ip:
-            query += f" AND source_ip = ${len(params) + 1}"
-            params.append(source_ip)
-            
-        query += f" ORDER BY timestamp DESC LIMIT ${len(params) + 1}"
-        params.append(limit)
-        
-        async with db_pool.acquire() as conn:
-            rows = await conn.fetch(query, *params)
-            
-        return [NetworkTraffic(**{**dict(row), 'source_ip': str(row['source_ip']), 'dest_ip': str(row['dest_ip'])}) for row in rows]
-        
-    except Exception as e:
-        logger.error("Failed to get traffic data", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to retrieve traffic data")
-
-@app.get("/api/alerts/live")
-async def get_live_alerts(user=Depends(get_current_user)):
-    """Get live alerts from Redis stream"""
-    try:
-        # Get recent alerts from Redis
-        alerts = redis_client.lrange('alert_stream', 0, 9)  # Last 10 alerts
-        
-        parsed_alerts = []
-        for alert_json in alerts:
-            try:
-                alert_data = json.loads(alert_json)
-                parsed_alerts.append(alert_data)
-            except json.JSONDecodeError:
-                continue
-                
-        return {"alerts": parsed_alerts}
-        
-    except Exception as e:
-        logger.error("Failed to get live alerts", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to retrieve live alerts")
-
-@app.post("/api/incidents/{incident_id}/acknowledge")
-async def acknowledge_incident(
-    incident_id: int,
-    user=Depends(get_current_user)
-):
-    """Acknowledge a security incident"""
-    try:
-        async with db_pool.acquire() as conn:
-            # Update incident status
-            result = await conn.execute("""
-                UPDATE security_incidents 
-                SET status = 'ACKNOWLEDGED', assigned_to = $1
-                WHERE id = $2
-            """, user["username"], incident_id)
-            
-            if result == "UPDATE 0":
-                raise HTTPException(status_code=404, detail="Incident not found")
-                
-            # Update related alerts
-            await conn.execute("""
-                UPDATE alerts 
-                SET acknowledged = TRUE, acknowledged_by = $1, acknowledged_at = NOW()
-                WHERE incident_id = $2
-            """, user["username"], incident_id)
-        
-        logger.info("Incident acknowledged", incident_id=incident_id, user=user["username"])
-        return {"message": "Incident acknowledged successfully"}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error("Failed to acknowledge incident", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to acknowledge incident")
-
-@app.post("/api/incidents/{incident_id}/resolve")
-async def resolve_incident(
-    incident_id: int,
-    user=Depends(get_current_user)
-):
-    """Resolve a security incident"""
-    try:
-        async with db_pool.acquire() as conn:
-            result = await conn.execute("""
-                UPDATE security_incidents 
-                SET status = 'RESOLVED', resolved_at = NOW()
-                WHERE id = $1
-            """, incident_id)
-            
-            if result == "UPDATE 0":
-                raise HTTPException(status_code=404, detail="Incident not found")
-        
-        logger.info("Incident resolved", incident_id=incident_id, user=user["username"])
-        return {"message": "Incident resolved successfully"}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error("Failed to resolve incident", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to resolve incident")
-
-@app.post("/api/advanced-scan")
-async def start_advanced_scan(
-    scan_request: dict,
-    user=Depends(get_current_user)
-):
-    """Start an advanced security scan"""
-    try:
-        target = scan_request.get("target", "localhost")
-        scan_type = scan_request.get("scan_type", "comprehensive")
-        
-        logger.info("Advanced scan requested", target=target, scan_type=scan_type)
-        
-        # For demo purposes, simulate scan results
-        # In production, this would trigger actual security tools
-        
-        scan_results = []
-        
-        if scan_type == "comprehensive":
-            scan_results = [
-                {
-                    "finding": "Open Port: 80/tcp (HTTP)",
-                    "severity": "INFO",
-                    "tool": "Nmap",
-                    "description": "HTTP service detected on port 80"
-                },
-                {
-                    "finding": "Open Port: 443/tcp (HTTPS)", 
-                    "severity": "INFO",
-                    "tool": "Nmap",
-                    "description": "HTTPS service detected on port 443"
-                },
-                {
-                    "finding": "SSH Service: OpenSSH 8.2",
-                    "severity": "LOW",
-                    "tool": "Nmap",
-                    "description": "SSH service version detected"
-                },
-                {
-                    "finding": "Web Server: Apache/2.4.41",
-                    "severity": "INFO", 
-                    "tool": "Nmap",
-                    "description": "Apache web server detected"
-                }
-            ]
-        elif scan_type == "vulnerability":
-            scan_results = [
-                {
-                    "finding": "Directory Listing Enabled",
-                    "severity": "MEDIUM",
-                    "tool": "Nikto",
-                    "description": "Server allows directory browsing"
-                },
-                {
-                    "finding": "Missing Security Headers",
-                    "severity": "LOW",
-                    "tool": "Nikto", 
-                    "description": "X-Frame-Options header not set"
-                },
-                {
-                    "finding": "Admin Panel Found: /admin",
-                    "severity": "HIGH",
-                    "tool": "Dirb",
-                    "description": "Administrative interface discovered"
-                }
-            ]
-        elif scan_type == "fast":
-            scan_results = [
-                {
-                    "finding": "Open Port: 80/tcp",
-                    "severity": "INFO",
-                    "tool": "Nmap",
-                    "description": "HTTP port open"
-                },
-                {
-                    "finding": "Open Port: 443/tcp",
-                    "severity": "INFO", 
-                    "tool": "Nmap",
-                    "description": "HTTPS port open"
-                }
-            ]
-        
-        # Create an incident for high-severity findings
-        high_severity_findings = [f for f in scan_results if f["severity"] in ["HIGH", "CRITICAL"]]
-        if high_severity_findings:
-            async with db_pool.acquire() as conn:
-                description = f"Advanced {scan_type} scan found {len(high_severity_findings)} high-severity issues on {target}"
-                await conn.execute("""
-                    INSERT INTO security_incidents 
-                    (created_at, severity, incident_type, source_ip, description, status)
-                    VALUES (NOW(), 'MEDIUM', 'ADVANCED_SCAN', $1, $2, 'OPEN')
-                """, target, description)
-        
-        return {
-            "status": "completed",
-            "target": target,
-            "scan_type": scan_type,
-            "findings": scan_results,
-            "total_findings": len(scan_results),
-            "high_severity": len(high_severity_findings)
-        }
-        
-    except Exception as e:
-        logger.error("Advanced scan failed", error=str(e))
-        raise HTTPException(status_code=500, detail="Advanced scan failed")
-
-@app.get("/api/scan-history")
-async def get_scan_history(user=Depends(get_current_user)):
-    """Get scan history"""
-    try:
-        # Return mock scan history for demo
-        history = [
-            {
-                "id": 1,
-                "target": "localhost",
-                "type": "comprehensive",
-                "timestamp": "2026-01-06T18:30:00Z",
-                "findings": 4,
-                "status": "completed"
-            },
-            {
-                "id": 2,
-                "target": "192.168.1.1",
-                "type": "vulnerability", 
-                "timestamp": "2026-01-06T17:15:00Z",
-                "findings": 3,
-                "status": "completed"
-            }
-        ]
-        
-        return {"scans": history}
-        
-    except Exception as e:
-        logger.error("Failed to get scan history", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to retrieve scan history")
-
-@app.get("/api/network/devices")
-async def get_network_devices(user=Depends(get_current_user)):
-    """Get discovered network devices"""
-    try:
-        async with db_pool.acquire() as conn:
-            # Get all devices
-            devices = await conn.fetch("""
-                SELECT id, ip_address, hostname, mac_address, vendor, device_type,
-                       os_fingerprint, open_ports, services, is_online, risk_score,
-                       last_seen, first_discovered
-                FROM network_devices 
-                ORDER BY last_seen DESC
-            """)
-            
-            # Get statistics
-            stats = await conn.fetchrow("""
-                SELECT 
-                    COUNT(*) as total,
-                    COUNT(*) FILTER (WHERE is_online = true) as online,
-                    COUNT(*) FILTER (WHERE is_online = false) as offline,
-                    COUNT(*) FILTER (WHERE first_discovered > NOW() - INTERVAL '1 day') as new_today
-                FROM network_devices
-            """)
-            
-            # Convert to dict and handle JSON fields
-            device_list = []
-            for device in devices:
-                device_dict = dict(device)
-                device_dict['ip_address'] = str(device_dict['ip_address'])
-                
-                # Parse JSON fields
-                if device_dict['services']:
-                    try:
-                        device_dict['services'] = json.loads(device_dict['services'])
-                    except:
-                        device_dict['services'] = {}
-                        
-                device_list.append(device_dict)
-            
-            return {
-                "devices": device_list,
-                "stats": dict(stats) if stats else {"total": 0, "online": 0, "offline": 0, "new_today": 0}
-            }
-            
-    except Exception as e:
-        logger.error("Failed to get network devices", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to retrieve network devices")
-
-@app.post("/api/network/scan")
-async def start_network_scan(user=Depends(get_current_user)):
-    """Trigger a network discovery scan"""
-    try:
-        # In a real implementation, this would trigger the network discovery service
-        # For now, we'll just return a success message
-        
-        logger.info("Network scan requested", user=user["username"])
-        
-        # You could trigger the actual scan here by:
-        # 1. Sending a message to a queue
-        # 2. Making an HTTP request to the discovery service
-        # 3. Writing a trigger file that the service monitors
-        
-        return {
-            "message": "Network scan started",
-            "status": "scanning",
-            "estimated_duration": "5-10 minutes"
-        }
-        
-    except Exception as e:
-        logger.error("Failed to start network scan", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to start network scan")
-
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

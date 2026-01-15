@@ -1,51 +1,65 @@
-# CyberHawk Attack Simulation Demos
+# CyberHawk Demo Resources
 
-This folder contains essential simulation scripts for testing CyberHawk's security monitoring capabilities.
+## Overview
 
-## 🎯 Available Simulations
+This directory contains demonstration resources for CyberHawk's defensive security analysis capabilities.
 
-### 1. **comprehensive_attack_demo.py** (Main Demo)
-**The primary attack simulation script** - includes all major attack types:
-- API brute force attacks
-- Port scanning simulation
-- Web vulnerability testing
-- Network reconnaissance
-- DoS attack simulation
+## Sample Data
 
-**Usage:**
-```bash
-python3 demos/comprehensive_attack_demo.py
-```
+### Sample Nmap XML File
 
-### 2. **traffic_injector.py**
-Generates realistic network traffic patterns for testing traffic analysis.
+The `../docs/sample_scan.xml` file contains a realistic Nmap XML scan result that demonstrates:
 
-**Usage:**
-```bash
-python3 demos/traffic_injector.py
-```
+- **Host Discovery**: Multiple network devices with different operating systems
+- **Service Detection**: Various services including SSH, HTTP, HTTPS, Telnet, RDP
+- **Risk Assessment**: Mix of low, medium, and high-risk services
+- **OS Fingerprinting**: Linux and Windows system identification
 
-## 🚀 Quick Start
+### Upload Instructions
 
-For a complete security demonstration, run:
-```bash
-python3 demos/comprehensive_attack_demo.py
-```
+1. **Access CyberHawk**: Navigate to the Scan Upload section
+2. **Upload Sample**: Use the sample XML file for testing
+3. **Review Results**: Examine the risk assessment and host analysis
+4. **Explore Features**: Test comparison and trend analysis capabilities
 
-Then monitor the results in:
-- **Live Threats** section for real-time alerts
-- **Network Monitor** for traffic analysis
-- **Command Center** for overall system status
+## Demo Scenarios
 
-## ⚠️ Important Notes
+### Scenario 1: Network Security Assessment
 
-- Only use these scripts on systems you own or have permission to test
-- All simulations are designed for demonstration purposes
-- Scripts generate realistic but safe attack patterns
-- Results work with both local Docker deployment and cloud deployment
+The sample scan represents a typical internal network assessment showing:
 
-## 🔧 Requirements
+- **Router/Gateway** (192.168.1.1): Standard network infrastructure
+- **Windows Workstation** (192.168.1.100): Corporate endpoint with RDP enabled
+- **IoT Camera** (192.168.1.75): High-risk device with Telnet service
 
-- Python 3.7+
-- No external dependencies required
-- Works with standalone frontend or full Docker deployment
+### Scenario 2: Risk Analysis
+
+CyberHawk will automatically identify:
+
+- **Critical Risk**: IoT camera with unencrypted Telnet access
+- **High Risk**: Windows workstation with RDP exposure
+- **Medium Risk**: Router with SSH management interface
+- **Remediation**: Specific recommendations for each finding
+
+## Educational Use
+
+This demo data is designed for:
+
+- **Security Training**: Understanding network vulnerability assessment
+- **Platform Evaluation**: Testing CyberHawk's analysis capabilities
+- **Portfolio Demonstration**: Showcasing defensive security analysis
+
+## Legal Notice
+
+All demo data represents simulated network environments only. No real network information or vulnerabilities are included. This data is for educational and demonstration purposes only.
+
+## Next Steps
+
+After exploring the demo data:
+
+1. **Generate Real Scans**: Use Kali Linux to create authorized scan data
+2. **Compare Results**: Upload multiple scans to see trend analysis
+3. **Customize Rules**: Adjust risk assessment criteria
+4. **Export Reports**: Generate compliance and executive summaries
+
+For detailed scanning instructions, see the [Kali Linux Integration Guide](../docs/KALI_LINUX_INTEGRATION.md).

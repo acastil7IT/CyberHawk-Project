@@ -1,102 +1,317 @@
-# CyberHawk - Intelligent Threat Hunting Platform
+# CyberHawk - Defensive Security Analysis Platform
 
 <div align="center">
 
-![CyberHawk Logo](https://img.shields.io/badge/CyberHawk-v3.0-blue?style=for-the-badge&logo=shield&logoColor=white)
-[![Security](https://img.shields.io/badge/Security-Enterprise-red?style=for-the-badge)](https://github.com/acastil7IT/Updated-Network-Security-PJ)
+![CyberHawk Logo](https://img.shields.io/badge/CyberHawk-v2.0-blue?style=for-the-badge&logo=shield&logoColor=white)
+[![Security](https://img.shields.io/badge/Security-Defensive%20Analysis-green?style=for-the-badge)](https://github.com/acastil7IT/CyberHawk-Project)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-green?style=for-the-badge)](https://updated-network-security-pj-rtms.vercel.app)
 
-**Professional-grade cybersecurity monitoring and threat detection platform**
+**Professional-grade defensive security analysis and scan result visualization platform**
 
-[Live Demo](https://updated-network-security-pj-rtms.vercel.app) • [Documentation](docs/) • [Security Features](#features)
+[Live Demo](https://updated-network-security-pj-rtms.vercel.app) • [Documentation](docs/) • [Kali Integration](docs/KALI_LINUX_INTEGRATION.md)
 
 </div>
 
-## Overview
+## 🛡️ Overview
 
-CyberHawk is an enterprise-grade cybersecurity platform that provides real-time network monitoring, threat detection, and incident response capabilities. Built with modern web technologies and professional security tools integration.
+CyberHawk is a **defensive security analysis platform** designed for security teams to analyze, compare, and assess network scan results. The platform ingests authorized scan data generated from tools like Nmap and provides comprehensive risk assessment, trend analysis, and security insights.
 
-## Technology Stack
+**Important**: CyberHawk does **NOT** perform active scanning or reconnaissance. It operates as a read-only analysis platform that processes scan results from authorized network assessments.
+
+## 🎯 Core Capabilities
+
+### Defensive Analysis Features
+- **Scan Result Ingestion** - Upload and process Nmap XML scan results
+- **Risk Assessment** - Automated risk scoring based on open ports and services
+- **Trend Analysis** - Compare scan results over time to identify changes
+- **Security Insights** - Identify high-risk hosts and vulnerable services
+- **Compliance Reporting** - Generate reports for security frameworks
+
+### Supported Scan Types
+- **Host Discovery** - Network asset identification and classification
+- **Port Scanning** - TCP/UDP port enumeration and service detection
+- **Service Detection** - Version identification and vulnerability mapping
+- **OS Fingerprinting** - Operating system identification and accuracy scoring
+
+## 🏗️ Technology Stack
 
 ### Frontend Technologies
-- **React.js** - Modern JavaScript framework for building user interfaces
-- **Ant Design** - Professional UI component library for enterprise applications
-- **CSS3** - Custom styling with responsive design and dark theme
+- **React.js 18** - Modern JavaScript framework with hooks
+- **Ant Design** - Professional UI component library
+- **Recharts** - Data visualization and charting
 - **Axios** - HTTP client for API communication
-- **JavaScript ES6+** - Modern JavaScript features and syntax
 
 ### Backend Technologies
-- **Python 3.8+** - Primary backend programming language
-- **FastAPI** - High-performance web framework for building APIs
-- **PostgreSQL** - Robust relational database for data persistence
-- **SQLAlchemy** - Python SQL toolkit and Object-Relational Mapping
-- **Uvicorn** - Lightning-fast ASGI server implementation
+- **FastAPI** - High-performance Python web framework
+- **PostgreSQL** - Robust relational database with JSON support
+- **AsyncPG** - Asynchronous PostgreSQL driver
+- **Pydantic** - Data validation and serialization
 
-### Security & Networking Tools
-- **Nmap** - Network discovery and security auditing
-- **Wireshark** - Network protocol analyzer
-- **Nikto** - Web server scanner for vulnerabilities
-- **Scapy** - Python packet manipulation library
-- **Custom Security Scripts** - Tailored threat detection algorithms
+### Security Features
+- **Input Validation** - Hardened XML parsing with XXE protection
+- **Rate Limiting** - Upload throttling and abuse prevention
+- **CORS Protection** - Restricted cross-origin access
+- **File Validation** - Size limits and type checking
 
-### Infrastructure & DevOps
-- **Docker** - Containerization platform for consistent deployments
-- **Docker Compose** - Multi-container application orchestration
-- **Nginx** - High-performance web server and reverse proxy
-- **Redis** - In-memory data structure store for caching
-- **Shell Scripts** - Automation and deployment scripts
+### Infrastructure
+- **Docker** - Containerized deployment
+- **Nginx** - Reverse proxy and static file serving
+- **Vercel** - Frontend hosting and CDN
+- **Railway** - Backend deployment platform
 
-### Cloud & Deployment
-- **Vercel** - Frontend hosting and serverless deployment
-- **Railway** - Full-stack application deployment platform
-- **GitHub Actions** - CI/CD pipeline automation (ready)
-- **Environment Variables** - Secure configuration management
+## 🚀 Quick Start
 
-### Development Tools
-- **Git** - Version control system
-- **ESLint** - JavaScript code linting and formatting
-- **Python Virtual Environments** - Isolated dependency management
-- **npm/yarn** - JavaScript package management
+### Option 1: Docker Deployment (Recommended)
 
-### Key Features
-
-- **Real-time Threat Detection** - Advanced monitoring with ML-powered analysis
-- **Professional Dashboard** - Clean, intuitive security operations center
-- **Network Discovery** - Automated asset discovery and monitoring
-- **Live Alerts** - Instant threat notifications and response
-- **Security Tools Integration** - Nmap, Wireshark, Nikto, and more
-- **Incident Management** - Complete threat lifecycle tracking
-
-## Quick Start
-
-### Prerequisites
-- **Docker** (v20.10+) & **Docker Compose** (v2.0+)
-- **Git** for version control
-- **Node.js** (v16+) and **npm** (for frontend-only setup)
-- **Python** (v3.8+) for running demo scripts
-
-### Installation Options
-
-#### Option 1: Full Docker Deployment (Recommended)
 ```bash
 # Clone the repository
-git clone https://github.com/acastil7IT/Updated-Network-Security-PJ.git
-cd Updated-Network-Security-PJ
+git clone https://github.com/acastil7IT/CyberHawk-Project.git
+cd CyberHawk-Project
 
-# Start all services with Docker
+# Start all services
 docker compose up -d
 
 # Access the platform
 # Web Interface: http://localhost:3000
 # API Gateway: http://localhost:8001
-# Database: localhost:5432
 ```
 
-#### Option 2: Frontend Only (Quick Test)
+### Option 2: Development Setup
+
 ```bash
-# Clone and navigate to frontend
-git clone https://github.com/acastil7IT/Updated-Network-Security-PJ.git
-cd Updated-Network-Security-PJ/frontend
+# Backend setup
+cd services/api-gateway
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8001
+
+# Frontend setup (new terminal)
+cd frontend
+npm install
+npm start
+
+# Database setup (new terminal)
+docker run -d --name cyberhawk-db \
+  -e POSTGRES_DB=cyberhawk_db \
+  -e POSTGRES_USER=cyberhawk \
+  -e POSTGRES_PASSWORD=secure123 \
+  -p 5433:5432 \
+  postgres:13-alpine
+```
+
+## 📊 Platform Usage
+
+### 1. Generate Authorized Scan Data
+
+Using Kali Linux or any system with Nmap:
+
+```bash
+# Basic network scan
+nmap -sS -sV -O -oX network_scan.xml 192.168.1.0/24
+
+# Comprehensive host scan
+nmap -sS -sV -sC -p- -oX host_scan.xml target.example.com
+
+# Service detection scan
+nmap -sV --script vuln -oX vuln_scan.xml 192.168.1.100
+```
+
+**⚠️ Legal Notice**: Only scan networks you own or are explicitly authorized to test.
+
+### 2. Upload and Analyze Results
+
+1. **Access CyberHawk** - Navigate to the Scan Upload section
+2. **Upload XML File** - Drag and drop your Nmap XML results
+3. **Add Context** - Include notes about the scan purpose and scope
+4. **Review Analysis** - Examine risk scores, host details, and recommendations
+
+### 3. Monitor and Compare
+
+- **Track Changes** - Compare scan results over time
+- **Risk Trends** - Monitor risk score changes and new vulnerabilities
+- **Asset Inventory** - Maintain up-to-date network asset database
+- **Compliance** - Generate reports for security audits
+
+## 🔒 Security Model
+
+### Defensive Approach
+- **No Active Scanning** - Platform never initiates network scans
+- **Read-Only Analysis** - Processes existing scan data only
+- **Authorized Data Only** - Designed for legitimate security assessments
+- **Privacy Focused** - No external data transmission
+
+### Data Protection
+- **Input Sanitization** - Hardened XML parsing prevents injection attacks
+- **Rate Limiting** - Prevents abuse and resource exhaustion
+- **Access Controls** - Authentication required for all operations
+- **Audit Logging** - Comprehensive activity logging
+
+## 📁 Project Structure
+
+```
+CyberHawk/
+├── frontend/                 # React.js web application
+│   ├── src/
+│   │   ├── components/      # UI components
+│   │   │   ├── Dashboard.js # Main security dashboard
+│   │   │   ├── ScanUpload.js # Scan result upload interface
+│   │   │   └── Incidents.js # Security incident management
+│   │   └── services/        # API integration
+├── services/
+│   ├── api-gateway/         # FastAPI backend service
+│   │   ├── main.py         # API endpoints and business logic
+│   │   └── requirements.txt # Python dependencies
+├── database/
+│   ├── init.sql            # Database schema
+│   └── sample_data.sql     # Demo data for testing
+├── docs/
+│   ├── KALI_LINUX_INTEGRATION.md # Kali Linux scanning guide
+│   ├── DEPLOYMENT.md       # Deployment instructions
+│   └── TECHNICAL_ARCHITECTURE.md # Technical documentation
+└── docker-compose.yml      # Container orchestration
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+```bash
+# Database Configuration
+DATABASE_URL=postgresql://cyberhawk:secure123@localhost:5433/cyberhawk_db
+
+# API Configuration
+CORS_ORIGINS=http://localhost:3000,https://your-domain.com
+
+# Security Settings
+MAX_UPLOAD_SIZE=10485760  # 10MB
+RATE_LIMIT_UPLOADS=10     # Per hour
+```
+
+### Database Schema
+
+The platform uses a normalized PostgreSQL schema:
+
+- **scan_sessions** - Uploaded scan metadata and statistics
+- **scan_hosts** - Discovered network hosts with risk scores
+- **scan_ports** - Open ports and service information
+- **security_incidents** - Risk-based security findings
+- **risk_rules** - Configurable risk assessment criteria
+
+## 📈 Risk Assessment
+
+### Automated Risk Scoring
+
+CyberHawk calculates risk scores based on:
+
+- **High-Risk Ports**: SSH (22), Telnet (23), RDP (3389), SMB (445)
+- **Database Services**: MySQL (3306), PostgreSQL (5432), MSSQL (1433)
+- **Management Protocols**: SNMP (161), WMI (135)
+- **Service Exposure**: Number and types of open services
+- **Known Vulnerabilities**: Service version analysis
+
+### Risk Levels
+
+- **CRITICAL (9-10)**: Immediate attention required
+- **HIGH (7-8)**: High priority remediation
+- **MEDIUM (4-6)**: Moderate risk, monitor closely
+- **LOW (1-3)**: Low risk, routine maintenance
+
+## 🔍 Supported Scan Formats
+
+### Nmap XML Output
+
+CyberHawk supports comprehensive Nmap XML files containing:
+
+- Host discovery results with IP addresses and hostnames
+- Port scan results with service detection
+- Operating system fingerprinting
+- Service version information
+- Script scan results and vulnerability data
+
+### Example Compatible Commands
+
+```bash
+# Host and service discovery
+nmap -sS -sV -O -oX comprehensive.xml 192.168.1.0/24
+
+# Vulnerability scanning
+nmap -sV --script vuln -oX vulnerability.xml target
+
+# Full port scan with OS detection
+nmap -sS -p- -O -oX full_scan.xml target
+```
+
+## 📚 Documentation
+
+- **[Kali Linux Integration Guide](docs/KALI_LINUX_INTEGRATION.md)** - Complete scanning workflow
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions
+- **[Technical Architecture](docs/TECHNICAL_ARCHITECTURE.md)** - System design and components
+- **[API Documentation](http://localhost:8001/docs)** - Interactive API reference
+
+## 🤝 Contributing
+
+We welcome contributions to improve CyberHawk's defensive analysis capabilities:
+
+1. **Fork the repository**
+2. **Create a feature branch** (`git checkout -b feature/enhancement`)
+3. **Commit changes** (`git commit -am 'Add new analysis feature'`)
+4. **Push to branch** (`git push origin feature/enhancement`)
+5. **Create Pull Request**
+
+### Development Guidelines
+
+- Follow secure coding practices
+- Maintain defensive security focus
+- Add comprehensive tests
+- Update documentation
+- Ensure compliance with security standards
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## ⚖️ Legal and Ethical Use
+
+**IMPORTANT**: CyberHawk is designed for legitimate security analysis of authorized networks only.
+
+### Acceptable Use
+- ✅ Analyzing scans of networks you own
+- ✅ Authorized penetration testing
+- ✅ Security compliance assessments
+- ✅ Internal security monitoring
+- ✅ Educational and research purposes
+
+### Prohibited Use
+- ❌ Scanning networks without permission
+- ❌ Unauthorized reconnaissance
+- ❌ Malicious security testing
+- ❌ Violation of applicable laws
+- ❌ Breach of service agreements
+
+### Compliance Requirements
+- Obtain written authorization before scanning
+- Follow responsible disclosure practices
+- Comply with local and international laws
+- Respect network owners' policies
+- Document all security testing activities
+
+## 🆘 Support
+
+### Getting Help
+- **Documentation**: Check the [docs/](docs/) directory
+- **Issues**: Report bugs via GitHub Issues
+- **Discussions**: Join community discussions
+- **Security**: Report security issues privately
+
+### Community Resources
+- [Nmap Documentation](https://nmap.org/docs.html)
+- [Kali Linux Resources](https://www.kali.org/docs/)
+- [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
+
+---
+
+**CyberHawk - Empowering Defensive Security Analysis**
+
+*Built with ❤️ for the cybersecurity community*
 
 # Install dependencies and start
 npm install
@@ -318,9 +533,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Links
 
 - **Live Demo**: https://updated-network-security-pj-rtms.vercel.app
-- **Repository**: https://github.com/acastil7IT/Updated-Network-Security-PJ
+- **Repository**: https://github.com/acastil7IT/CyberHawk-Project
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/acastil7IT/Updated-Network-Security-PJ/issues)
+- **Issues**: [GitHub Issues](https://github.com/acastil7IT/CyberHawk-Project/issues)
 
 ---
 
@@ -328,7 +543,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with care for cybersecurity professionals**
 
-[![GitHub stars](https://img.shields.io/github/stars/acastil7IT/Updated-Network-Security-PJ?style=social)](https://github.com/acastil7IT/Updated-Network-Security-PJ/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/acastil7IT/Updated-Network-Security-PJ?style=social)](https://github.com/acastil7IT/Updated-Network-Security-PJ/network/members)
+[![GitHub stars](https://img.shields.io/github/stars/acastil7IT/CyberHawk-Project?style=social)](https://github.com/acastil7IT/CyberHawk-Project/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/acastil7IT/CyberHawk-Project?style=social)](https://github.com/acastil7IT/CyberHawk-Project/network/members)
 
 </div>

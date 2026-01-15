@@ -3,16 +3,17 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
 import {
   DashboardOutlined,
-  GlobalOutlined,
+  UploadOutlined,
   SecurityScanOutlined,
   BugOutlined,
-  SafetyOutlined
+  SafetyOutlined,
+  HistoryOutlined
 } from '@ant-design/icons';
 
 import Dashboard from './components/Dashboard';
-import NetworkTraffic from './components/NetworkTraffic';
+import ScanUpload from './components/ScanUpload';
 import LiveAlerts from './components/LiveAlerts';
-import AdvancedScanning from './components/AdvancedScanning';
+import Incidents from './components/Incidents';
 
 import './App.css';
 
@@ -23,22 +24,22 @@ function App() {
     {
       key: '/',
       icon: <DashboardOutlined />,
-      label: 'Command Center',
+      label: 'Security Dashboard',
     },
     {
-      key: '/traffic',
-      icon: <GlobalOutlined />,
-      label: 'Network Monitor',
+      key: '/scan-upload',
+      icon: <UploadOutlined />,
+      label: 'Scan Upload',
+    },
+    {
+      key: '/incidents',
+      icon: <BugOutlined />,
+      label: 'Security Incidents',
     },
     {
       key: '/alerts',
       icon: <SecurityScanOutlined />,
-      label: 'Live Threats',
-    },
-    {
-      key: '/security-tools',
-      icon: <BugOutlined />,
-      label: 'Security & Discovery',
+      label: 'Live Alerts',
     },
   ];
 
@@ -54,6 +55,9 @@ function App() {
           <div className="logo">
             <SafetyOutlined style={{ fontSize: '28px', color: '#00d4ff' }} />
             <span className="logo-text">CyberHawk</span>
+            <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
+              Defensive Analysis
+            </div>
           </div>
           
           <Menu
@@ -71,13 +75,29 @@ function App() {
           <Header className="cyberhawk-header">
             <div className="header-title">
               <h2 style={{ margin: 0, color: '#1e293b' }}>
-                CyberHawk Security Operations Center
+                CyberHawk Defensive Security Analysis Platform
               </h2>
+              <div style={{ fontSize: '12px', color: '#64748b' }}>
+                Network Security Analysis & Scan Result Ingestion
+              </div>
             </div>
           </Header>
           
           <Content className="cyberhawk-content">
             <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/scan-upload" element={<ScanUpload />} />
+              <Route path="/incidents" element={<Incidents />} />
+              <Route path="/alerts" element={<LiveAlerts />} />
+            </Routes>
+          </Content>
+        </Layout>
+      </Layout>
+    </Router>
+  );
+}
+
+export default App;
               <Route path="/" element={<Dashboard />} />
               <Route path="/traffic" element={<NetworkTraffic />} />
               <Route path="/alerts" element={<LiveAlerts />} />

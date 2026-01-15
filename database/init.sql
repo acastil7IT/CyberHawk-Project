@@ -1,20 +1,69 @@
--- SecureNet Monitor Database Schema
+-- CyberHawk Defensive Security Analysis Platform Database Schema
 
--- Network traffic logs
-CREATE TABLE network_traffic (
+-- Scan sessions for tracking uploaded scan results
+CREATE TABLE scan_sessions (
     id SERIAL PRIMARY KEY,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    source_ip INET NOT NULL,
-    dest_ip INET NOT NULL,
-    source_port INTEGER,
-    dest_port INTEGER,
-    protocol VARCHAR(10),
-    packet_size INTEGER,
-    flags VARCHAR(20),
-    payload_hash VARCHAR(64)
+    session_id VARCHAR(100) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    filename VARCHAR(255) NOT NULL,
+    file_hash VARCHAR(64) NOT NULL,
+    scan_type VARCHAR(50) DEFAULT 'nmap_xml',
+    total_hosts INTEGER DEFAULT 0,
+    total_open_ports INTEGER DEFAULT 0,
+    high_risk_ports INTEGER DEFAULT 0,
+    scan_command TEXT,
+    scan_args TEXT,
+    scan_start_time TIMESTAMP,
+    scan_end_time TIMESTAMP,
+    notes TEXT
 );
 
--- Security incidents
+-- Discovered hosts from scan results
+CREATE TABLE scan_hosts (
+    id SERIAL PRIMARY KEY,
+    session_id VARCHAR(100) REFERENCES scan_sessions(session_id) ON DELETE CASCADE,
+    ip_address INET NOT NULL,
+    hostname VARCHAR(255),
+    mac_address VARCHAR(17),
+    vendor VARCHAR(255),
+    os_name VARCHAR(255),
+    os_accuracy INTEGER,
+    host_state VARCHAR(20) DEFAULT 'up',
+    risk_score INTEGER DEFAULT 0,
+    risk_level VARCHAR(10) DEFAULT 'LOW',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Open ports discovered on hosts
+CREATE TABLE scan_ports (
+    id SERIAL PRIMARY KEY,
+    host_id INTEGER REFERENCES scan_hosts(id) ON DELETE CASCADE,
+    session_id VARCHAR(100) REFERENCES scan_sessions(session_id) ON DELETE CASCADE,
+    port_number INTEGER NOT NULL,
+    protocol VARCHAR(10) NOT NULL,
+    port_state VARCHAR(20) DEFAULT 'open',
+    service_name VARCHAR(100),
+    service_version VARCHAR(255),
+    service_product VARCHAR(255),
+    is_high_risk BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Risk assessment rules for ports and services
+CREATE TABLE risk_rules (
+    id SERIAL PRIMARY KEY,
+    port_number INTEGER,
+    protocol VARCHAR(10),
+    service_name VARCHAR(100),
+    risk_score INTEGER NOT NULL,
+    risk_level VARCHAR(10) NOT NULL,
+    description TEXT,
+    remediation_advice TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    active BOOLEAN DEFAULT TRUE
+);
+
+-- Security incidents (simplified for defensive analysis)
 CREATE TABLE security_incidents (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -24,18 +73,8 @@ CREATE TABLE security_incidents (
     description TEXT,
     status VARCHAR(20) DEFAULT 'OPEN',
     assigned_to VARCHAR(100),
-    resolved_at TIMESTAMP
-);
-
--- Threat signatures
-CREATE TABLE threat_signatures (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    pattern TEXT NOT NULL,
-    severity VARCHAR(20),
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    active BOOLEAN DEFAULT TRUE
+    resolved_at TIMESTAMP,
+    session_id VARCHAR(100) REFERENCES scan_sessions(session_id)
 );
 
 -- System alerts
