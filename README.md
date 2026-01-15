@@ -6,6 +6,20 @@ A professional-grade defensive security analysis platform designed for security 
 
 ---
 
+## Purpose
+
+CyberHawk addresses the challenge of managing and analyzing network security scan data at scale. Security teams often conduct regular network assessments but lack centralized tools to track changes over time, identify trends, and prioritize remediation efforts. This platform bridges that gap by providing:
+
+- Centralized repository for scan results with historical tracking
+- Automated risk assessment to prioritize security findings
+- Trend analysis to identify emerging vulnerabilities
+- Visual dashboards for executive reporting and team collaboration
+- Compliance documentation for security audits
+
+The platform is built for security professionals who need to transform raw scan data into actionable intelligence while maintaining a clear audit trail of network security posture over time.
+
+---
+
 ## Overview
 
 CyberHawk operates as a defensive security analysis platform that processes and visualizes network scan results. The platform does not perform active scanning or reconnaissance. Instead, it analyzes scan data generated from authorized security assessments to provide actionable insights and risk metrics.
@@ -81,40 +95,85 @@ Services will be available at:
 
 ---
 
-## Usage
+## Usage Workflow
 
-### Generating Scan Data
+### Step 1: Generate Scan Data
 
-Use Nmap to generate compatible XML scan results:
+Conduct authorized network scans using Nmap on systems you own or have permission to test. The platform supports standard Nmap XML output formats.
+
+**Example scan commands:**
 
 ```bash
-# Network scan
+# Basic network discovery and service detection
 nmap -sS -sV -O -oX network_scan.xml 192.168.1.0/24
 
-# Comprehensive host scan
+# Comprehensive single host analysis
 nmap -sS -sV -sC -p- -oX host_scan.xml target.example.com
 
-# Service detection
+# Vulnerability assessment scan
 nmap -sV --script vuln -oX vuln_scan.xml 192.168.1.100
+
+# Fast scan of common ports
+nmap -sS -sV --top-ports 1000 -oX quick_scan.xml 10.0.0.0/24
 ```
 
-**Important:** Only scan networks you own or are explicitly authorized to test.
+**Authorization Requirements:** Ensure you have written authorization before scanning any network. Unauthorized scanning may violate laws and organizational policies.
 
-### Uploading Scan Results
+### Step 2: Upload and Process
 
-1. Navigate to the Scan Upload section
-2. Upload your Nmap XML file via drag-and-drop or file browser
-3. Add optional notes describing the scan context
-4. Review the automated risk assessment and host details
+1. Access the platform dashboard
+2. Click "Upload Nmap Scan" button
+3. Select or drag-and-drop your XML scan file
+4. Add contextual notes (optional but recommended):
+   - Scan purpose and scope
+   - Authorization details
+   - Expected findings or concerns
+5. Submit for processing
 
-### Analyzing Results
+The platform validates the file format, parses the XML data, and generates risk scores automatically.
 
-The platform provides several analysis views:
+### Step 3: Review Analysis
 
-- **Dashboard:** Overall security posture and key metrics
-- **Scan Sessions:** Historical scan data with comparison capabilities
-- **Session Details:** Detailed host information, open ports, and services
-- **Incidents:** Security findings with severity classification
+**Dashboard View**
+- Total hosts discovered and scan session count
+- High-risk host identification
+- Security incident summary
+- Recent activity timeline
+
+**Scan Sessions**
+- Complete history of uploaded scans
+- Session metadata including timestamps and file details
+- Quick comparison between scan sessions
+- Export capabilities for reporting
+
+**Session Details**
+- Individual host information with IP and hostname
+- Complete port inventory with service versions
+- Risk score breakdown and contributing factors
+- Operating system fingerprinting results
+
+**Incident Management**
+- Automatically generated security findings
+- Severity-based prioritization (Critical, High, Medium, Low)
+- Status tracking (Open, Acknowledged, Resolved)
+- Assignment and workflow management
+
+### Step 4: Track and Compare
+
+Use the comparison features to monitor security posture changes:
+
+- Identify newly discovered hosts or services
+- Track closed vulnerabilities and remediation progress
+- Monitor risk score trends over time
+- Generate compliance reports for audits
+
+### Best Practices
+
+- Conduct regular scans (weekly or monthly) to establish baseline trends
+- Document scan context in notes for future reference
+- Review and acknowledge incidents promptly
+- Use consistent scan parameters for accurate comparisons
+- Archive scan files externally for long-term retention
 
 ---
 

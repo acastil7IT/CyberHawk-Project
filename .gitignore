@@ -78,3 +78,7 @@ Thumbs.db
 
 # Docker
 .dockerignore
+
+# Deployment files (internal use only)
+DEPLOYMENT_SUMMARY.md
+VERCEL_DEPLOYMENT.md
